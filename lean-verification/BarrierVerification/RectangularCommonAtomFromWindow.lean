@@ -100,7 +100,8 @@ theorem rectangularCommonAtom_from_window
         apply Subtype.ext
         rfl
       rw [hinput]
-      exact hentry
+      simpa [output, shift, W, phi, psi, hker,
+        Matrix.mulVec_single_one] using hentry
     have hfinGenerated : Module.finrank K (Algebra.adjoin K {shift}) ≤ t :=
       (finrank_generatedShift_le shift).trans hfinW
     exact matrixCommonAtomOfGeneratedFunctional shift moment lambda htk
