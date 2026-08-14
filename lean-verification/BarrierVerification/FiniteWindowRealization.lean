@@ -505,7 +505,7 @@ theorem blockSynthesis_singleBlockCoeff
   rw [Fintype.sum_eq_single ⟨b, by omega⟩]
   · simp [singleBlockCoeff]
   · intro j hj
-    rw [Pi.single_eq_of_ne hj, map_zero]
+    simp [singleBlockCoeff, hj]
 
 @[simp]
 theorem shiftedBlockSynthesis_singleBlockCoeff
@@ -518,7 +518,7 @@ theorem shiftedBlockSynthesis_singleBlockCoeff
   rw [Fintype.sum_eq_single ⟨b, by omega⟩]
   · simp [singleBlockCoeff]
   · intro j hj
-    rw [Pi.single_eq_of_ne hj, map_zero]
+    simp [singleBlockCoeff, hj]
 
 /-- The protected finite Hankel window produces an honest finite-dimensional
 state shift.  Its powers send the initial block column to every protected
@@ -534,9 +534,9 @@ theorem exists_plateau_state_shift
       (momentBlockColumn moment k) C ≠ ⊥)
     (hrank : Module.finrank K
       (blockColumnSpan (K := K) (momentBlockColumn moment k) L) ≤ t) :
-    ∃ h (hC : C ≤ h) (hLt : h < C + t)
-      (hplateau : blockColumnSpan (K := K) (momentBlockColumn moment k) h =
-        blockColumnSpan (K := K) (momentBlockColumn moment k) (h + 1)),
+    ∃ h, ∃ hC : C ≤ h, ∃ hLt : h < C + t,
+      ∃ hplateau : blockColumnSpan (K := K) (momentBlockColumn moment k) h =
+        blockColumnSpan (K := K) (momentBlockColumn moment k) (h + 1),
       let phi := blockSynthesis (K := K) (momentBlockColumn moment k) h
       let psi := shiftedBlockSynthesis (K := K) (momentBlockColumn moment k) h
       let hker : LinearMap.ker phi ≤ LinearMap.ker psi :=

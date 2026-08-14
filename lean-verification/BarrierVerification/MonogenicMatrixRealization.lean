@@ -1,0 +1,180 @@
+import BarrierVerification.MatrixPairingQuotient
+import Mathlib.Algebra.CharP.Two
+import Mathlib.LinearAlgebra.Charpoly.Basic
+import Mathlib.RingTheory.Adjoin.PowerBasis
+
+namespace BarrierVerification
+
+open scoped BigOperators
+
+/-- The element used to generate the algebra of a state-shift endomorphism. -/
+def generatedShift
+    {K W : Type*} [Field K] [AddCommGroup W] [Module K W]
+    (shift : Module.End K W) : Algebra.adjoin K {shift} :=
+  ⟨shift, Algebra.self_mem_adjoin_singleton K shift⟩
+
+/-- A singleton generator still generates after passing to its own adjoining
+subalgebra. -/
+theorem generatedShift_adjoin_eq_top
+    {K W : Type*} [Field K] [AddCommGroup W] [Module K W]
+    (shift : Module.End K W) :
+    Algebra.adjoin K {generatedShift shift} = ⊤ := by
+  apply top_unique
+  rintro ⟨x, hx⟩ _
+  rw [Algebra.adjoin_singleton_eq_range_aeval] at hx
+  obtain ⟨p, hp⟩ := hx
+  rw [Algebra.adjoin_singleton_eq_range_aeval]
+  refine ⟨p, ?_⟩
+  apply Subtype.ext
+  simpa [generatedShift] using hp
+
+/-- The matrix-valued input/output functional of a finite state space. -/
+def stateMatrixFunctional
+    {K W : Type*} [Field K] [AddCommGroup W] [Module K W]
+    {m : ℕ}
+    (input : (Fin m → K) →ₗ[K] W)
+    (output : W →ₗ[K] (Fin m → K))
+    (shift : Module.End K W) :
+    Algebra.adjoin K {shift} →ₗ[K] Matrix (Fin m) (Fin m) K where
+  toFun a i j := output ((a : Module.End K W) (input (Pi.single j 1))) i
+  map_add' a b := by
+    ext i j
+    simp
+  map_smul' c a := by
+    ext i j
+    simp
+
+/-- A protected power window with entrywise Frobenius compatibility makes the
+matrix functional square-compatible on the whole generated algebra. -/
+theorem generatedFunctional_mapSq
+    {K W : Type*} [Field K] [CharP K 2]
+    [AddCommGroup W] [Module K W] [FiniteDimensional K W]
+    {m C k t : ℕ}
+    (shift : Module.End K W)
+    (moment : ℕ → Matrix (Fin m) (Fin m) K)
+    (lambda : Algebra.adjoin K {shift} →ₗ[K] Matrix (Fin m) (Fin m) K)
+    (htk : t < k)
+    (hC : 2 * t ≤ C + 2)
+    (hfinrank : Module.finrank K (Algebra.adjoin K {shift}) ≤ t)
+    (hmoment : ∀ e, e ≤ C → lambda (generatedShift shift ^ e) = moment e)
+    (hfrob : ∀ e, e < k → moment (2 * e) = (moment e).map (· ^ 2)) :
+    ∀ x row col, lambda (x ^ 2) row col = lambda x row col ^ 2 := by
+  classical
+  let A0 := Algebra.adjoin K {shift}
+  letI : CommRing A0 := Algebra.adjoinCommRingOfComm K (by
+    intro a ha b hb
+    simp only [Set.mem_singleton_iff] at ha hb
+    subst a
+    subst b
+    rfl)
+  letI : FiniteDimensional K A0 :=
+    FiniteDimensional.of_injective
+      (Algebra.adjoin K {shift}).val.toLinearMap Subtype.val_injective
+  let gen : A0 := generatedShift shift
+  have hgenerated : Algebra.adjoin K {gen} = ⊤ :=
+    generatedShift_adjoin_eq_top shift
+  let pb : PowerBasis K A0 :=
+    PowerBasis.ofAdjoinEqTop (IsIntegral.of_finite K gen) hgenerated
+  have hpbdim : pb.dim = Module.finrank K A0 :=
+    (PowerBasis.finrank pb).symm
+  intro x row col
+  have hrepr := pb.basis.sum_repr x
+  rw [← hrepr]
+  rw [Finset.sum_pow_char]
+  simp only [map_sum, Finset.sum_apply]
+  rw [Finset.sum_pow_char]
+  apply Finset.sum_congr rfl
+  intro i _hi
+  have hit : (i : ℕ) < t := by
+    have hi : (i : ℕ) < Module.finrank K A0 := by
+      simpa [hpbdim] using i.isLt
+    omega
+  have hiC : 2 * (i : ℕ) ≤ C := by omega
+  have himoment := hmoment (2 * (i : ℕ)) hiC
+  have himoment' := hmoment (i : ℕ) (by omega)
+  have hentry := congrArg (fun M : Matrix (Fin m) (Fin m) K => M row col)
+    (hfrob (i : ℕ) (by omega))
+  simp only [Matrix.map_apply] at hentry
+  rw [pb.basis_eq_pow, show pb.gen = gen by rfl]
+  rw [show ((pb.basis.repr x i • gen ^ (i : ℕ)) ^ 2) =
+      (pb.basis.repr x i) ^ 2 • gen ^ (2 * (i : ℕ)) by
+        simp [Algebra.smul_def, mul_pow, pow_mul, mul_comm]]
+  rw [map_smul, himoment, Matrix.smul_apply]
+  rw [map_smul, himoment', Matrix.smul_apply]
+  rw [hentry]
+  ring
+
+/-- Quotienting a generated matrix realization by its joint pairing radical
+preserves generation and cannot increase dimension. -/
+theorem matrixCommonAtomOfGeneratedFunctional
+    {K W : Type*} [Field K] [IsAlgClosed K] [CharP K 2]
+    [AddCommGroup W] [Module K W] [FiniteDimensional K W]
+    {m C Q k t : ℕ}
+    (shift : Module.End K W)
+    (moment : ℕ → Matrix (Fin m) (Fin m) K)
+    (lambda : Algebra.adjoin K {shift} →ₗ[K] Matrix (Fin m) (Fin m) K)
+    (htk : t < k)
+    (hQC : Q ≤ C)
+    (hC : 2 * t ≤ C + 2)
+    (hfinrank : Module.finrank K (Algebra.adjoin K {shift}) ≤ t)
+    (hmoment : ∀ e, e ≤ C → lambda (generatedShift shift ^ e) = moment e)
+    (hfrob : ∀ e, e < k → moment (2 * e) = (moment e).map (· ^ 2)) :
+    ∃ u : ℕ, ∃ atoms : Fin u → K,
+      ∃ coefficients : Fin u → Matrix (Fin m) (Fin m) K,
+        u ≤ t ∧ Function.Injective atoms ∧
+        (∀ i, coefficients i ≠ 0) ∧
+        (∀ i row col, coefficients i row col = 0 ∨
+          coefficients i row col = 1) ∧
+        ∀ e, e ≤ Q → moment e = ∑ i,
+          (atoms i ^ e) • coefficients i := by
+  classical
+  let A0 := Algebra.adjoin K {shift}
+  letI : CommRing A0 := Algebra.adjoinCommRingOfComm K (by
+    intro a ha b hb
+    simp only [Set.mem_singleton_iff] at ha hb
+    subst a
+    subst b
+    rfl)
+  letI : FiniteDimensional K A0 :=
+    FiniteDimensional.of_injective
+      (Algebra.adjoin K {shift}).val.toLinearMap Subtype.val_injective
+  let gen : A0 := generatedShift shift
+  have hgenerated : Algebra.adjoin K {gen} = ⊤ :=
+    generatedShift_adjoin_eq_top shift
+  have hmapSq : ∀ x row col,
+      lambda (x ^ 2) row col = lambda x row col ^ 2 :=
+    generatedFunctional_mapSq shift moment lambda htk hC hfinrank hmoment hfrob
+  let J : Ideal A0 := matrixPairingRadical lambda
+  let AQ := A0 ⧸ J
+  let lambdaQ : AQ →ₗ[K] Matrix (Fin m) (Fin m) K :=
+    matrixQuotientFunctional lambda
+  let generatorQ : AQ := Ideal.Quotient.mk J gen
+  have hnondegenerate : ∀ a : AQ,
+      (∀ b, lambdaQ (a * b) = 0) → a = 0 :=
+    matrixQuotientFunctional_jointNondegenerate lambda
+  have hmapSqQ : ∀ x : AQ, ∀ row col,
+      lambdaQ (x ^ 2) row col = lambdaQ x row col ^ 2 :=
+    matrixQuotientFunctional_mapSq lambda hmapSq
+  have hsurj : Function.Surjective (Ideal.Quotient.mkₐ K J) :=
+    Ideal.Quotient.mkₐ_surjective J
+  have hgeneratesQ : Algebra.adjoin K {generatorQ} = ⊤ := by
+    have hmap := congrArg
+      (fun S : Subalgebra K A0 => S.map (Ideal.Quotient.mkₐ K J)) hgenerated
+    simpa [generatorQ, Algebra.map_adjoin_singleton,
+      (AlgHom.range_eq_top (Ideal.Quotient.mkₐ K J)).2 hsurj] using hmap
+  have hfinrankQ : Module.finrank K AQ ≤ t := by
+    exact (Submodule.finrank_quotient_le J.toSubmodule).trans hfinrank
+  have hmomentQ : ∀ e, e ≤ Q → lambdaQ (generatorQ ^ e) = moment e := by
+    intro e he
+    change matrixQuotientFunctional lambda
+      ((Ideal.Quotient.mk J gen) ^ e) = moment e
+    rw [← map_pow (Ideal.Quotient.mk J), matrixQuotientFunctional_mk]
+    exact hmoment e (he.trans hQC)
+  obtain ⟨spectrum, hspectrumRank, hspectrumMoment⟩ :=
+    matrixCommonAtomOfRealization moment lambdaQ generatorQ hmapSqQ
+      hnondegenerate hgeneratesQ hfinrankQ hmomentQ
+  exact ⟨spectrum.atomCount, spectrum.atoms, spectrum.coefficients,
+    hspectrumRank, spectrum.atoms_injective, spectrum.coefficients_ne_zero,
+    spectrum.coefficient_entry_binary, hspectrumMoment⟩
+
+end BarrierVerification
