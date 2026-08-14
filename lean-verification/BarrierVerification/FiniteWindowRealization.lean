@@ -423,4 +423,54 @@ theorem inducedShiftOnRange_apply
       ⟨psi x, hrange ⟨x, rfl⟩⟩ := by
   simp [inducedShiftOnRange, LinearMap.quotKerEquivRange_symm_apply_image]
 
+/-- At a plateau, shifting the displayed block columns introduces no new
+state direction. -/
+theorem range_shiftedBlockSynthesis_le_of_plateau
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h : ℕ)
+    (hplateau : blockColumnSpan (K := K) G h =
+      blockColumnSpan (K := K) G (h + 1)) :
+    LinearMap.range (shiftedBlockSynthesis (K := K) G h) ≤
+      LinearMap.range (blockSynthesis (K := K) G h) := by
+  rw [range_blockSynthesis (K := K), hplateau]
+  rintro _ ⟨x, rfl⟩
+  rw [shiftedBlockSynthesis_apply (K := K)]
+  apply Submodule.sum_mem
+  intro b _hb
+  apply Submodule.subset_span
+  exact ⟨b.1 + 1, by omega, ⟨x b, rfl⟩⟩
+
+/-- The finite shift endomorphism attached to a plateau of block-column
+spans. -/
+noncomputable def blockShiftOnPlateau
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h : ℕ)
+    (hker : LinearMap.ker (blockSynthesis (K := K) G h) ≤
+      LinearMap.ker (shiftedBlockSynthesis (K := K) G h))
+    (hplateau : blockColumnSpan (K := K) G h =
+      blockColumnSpan (K := K) G (h + 1)) :
+    LinearMap.range (blockSynthesis (K := K) G h) →ₗ[K]
+      LinearMap.range (blockSynthesis (K := K) G h) :=
+  inducedShiftOnRange
+    (blockSynthesis (K := K) G h)
+    (shiftedBlockSynthesis (K := K) G h)
+    hker (range_shiftedBlockSynthesis_le_of_plateau G h hplateau)
+
+theorem blockShiftOnPlateau_apply
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h : ℕ)
+    (hker : LinearMap.ker (blockSynthesis (K := K) G h) ≤
+      LinearMap.ker (shiftedBlockSynthesis (K := K) G h))
+    (hplateau : blockColumnSpan (K := K) G h =
+      blockColumnSpan (K := K) G (h + 1))
+    (x : Fin (h + 1) → X) :
+    blockShiftOnPlateau G h hker hplateau
+        ⟨blockSynthesis (K := K) G h x, ⟨x, rfl⟩⟩ =
+      ⟨shiftedBlockSynthesis (K := K) G h x,
+        range_shiftedBlockSynthesis_le_of_plateau G h hplateau ⟨x, rfl⟩⟩ := by
+  exact inducedShiftOnRange_apply _ _ _ _ x
+
 end BarrierVerification
