@@ -4,6 +4,49 @@ namespace BarrierVerification
 
 open Set
 
+/-- The protected rectangular block-Hankel matrix of matrix moments. -/
+def rectangularBlockHankel
+    {K : Type*} {m : ℕ}
+    (moment : ℕ → Matrix (Fin m) (Fin m) K) (k L : ℕ) :
+    Matrix (Fin k × Fin m) (Fin (L + 1) × Fin m) K :=
+  fun ai bj => moment (ai.1.1 + bj.1.1) ai.2 bj.2
+
+/-- One block column, acting on its `m` scalar coefficients. -/
+def momentBlockColumn
+    {K : Type*} [Field K] {m : ℕ}
+    (moment : ℕ → Matrix (Fin m) (Fin m) K) (k b : ℕ) :
+    (Fin m → K) →ₗ[K] (Fin k × Fin m → K) :=
+  LinearMap.pi fun ai => (moment (ai.1.1 + b)).mulVecLin
+
+@[simp]
+theorem momentBlockColumn_apply
+    {K : Type*} [Field K] {m : ℕ}
+    (moment : ℕ → Matrix (Fin m) (Fin m) K)
+    (k b : ℕ) (x : Fin m → K) (a : Fin k) (i : Fin m) :
+    momentBlockColumn moment k b x (a, i) =
+      (moment (a.1 + b) *ᵥ x) i :=
+  rfl
+
+/-- Moment-vector sequence produced by a finite linear relation among block
+columns. -/
+def relationMoment
+    {K : Type*} [Field K] {m h : ℕ}
+    (moment : ℕ → Matrix (Fin m) (Fin m) K)
+    (x : Fin (h + 1) → (Fin m → K)) (j : ℕ) : Fin m → K :=
+  ∑ b, moment (b.1 + j) *ᵥ x b
+
+/-- A shifted window of `relationMoment` is the corresponding sum of shifted
+block columns. -/
+theorem relationMoment_window_eq
+    {K : Type*} [Field K] {m h : ℕ}
+    (moment : ℕ → Matrix (Fin m) (Fin m) K)
+    (x : Fin (h + 1) → (Fin m → K)) (k s : ℕ) :
+    (fun ai : Fin k × Fin m => relationMoment moment x (s + ai.1.1) ai.2) =
+      ∑ b, momentBlockColumn moment k (b.1 + s) (x b) := by
+  funext ai
+  simp [relationMoment, Matrix.mulVec, Finset.sum_apply,
+    add_assoc, add_comm, add_left_comm]
+
 /-- Vectors obtainable from one displayed block column up to index `h`. -/
 def blockColumnSet
     {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
@@ -93,22 +136,24 @@ theorem reverseWindowFamily_linearIndependent
     (hqzero : ∀ j, j < k → q j = 0)
     (hqk : q k ≠ 0)
     (hnk : n ≤ k) :
-    LinearIndependent K (reverseWindowFamily q k n) := by
+    LinearIndependent K (reverseWindowFamily (K := K) q k n) := by
   induction n with
   | zero => exact linearIndependent_empty_type
   | succ n ih =>
       have hnle : n ≤ k := by omega
-      have hli : LinearIndependent K (reverseWindowFamily q k n) := ih hnle
+      have hli : LinearIndependent K
+          (reverseWindowFamily (K := K) q k n) := ih hnle
       let pivotRow : Fin k := ⟨k - (n + 1), by omega⟩
       let newest : Fin k → V := fun a => q (n + 1 + a.1)
       let evaluate : (Fin k → V) →ₗ[K] V := LinearMap.proj pivotRow
       have htail_zero (i : Fin n) :
-          evaluate (reverseWindowFamily q k n i) = 0 := by
+          evaluate (reverseWindowFamily (K := K) q k n i) = 0 := by
         change q (n - i.1 + (k - (n + 1))) = 0
         apply hqzero
         omega
       have hspan_le :
-          Submodule.span K (range (reverseWindowFamily q k n)) ≤
+          Submodule.span K
+              (range (reverseWindowFamily (K := K) q k n)) ≤
             LinearMap.ker evaluate := by
         apply Submodule.span_le.2
         intro x hx
@@ -119,7 +164,8 @@ theorem reverseWindowFamily_linearIndependent
         congr 1
         omega
       have hnewest_not_mem :
-          newest ∉ Submodule.span K (range (reverseWindowFamily q k n)) := by
+          newest ∉ Submodule.span K
+            (range (reverseWindowFamily (K := K) q k n)) := by
         intro hmem
         have hzero : evaluate newest = 0 :=
           LinearMap.mem_ker.1 (hspan_le hmem)
@@ -127,12 +173,12 @@ theorem reverseWindowFamily_linearIndependent
         rw [hnewest_eval] at hzero
         exact hzero
       have hcons : LinearIndependent K
-          (Fin.cons newest (reverseWindowFamily q k n) :
+          (Fin.cons newest (reverseWindowFamily (K := K) q k n) :
             Fin (n + 1) → (Fin k → V)) :=
         hli.finCons hnewest_not_mem
       have hfamily :
-          reverseWindowFamily q k (n + 1) =
-            (Fin.cons newest (reverseWindowFamily q k n) :
+          reverseWindowFamily (K := K) q k (n + 1) =
+            (Fin.cons newest (reverseWindowFamily (K := K) q k n) :
               Fin (n + 1) → (Fin k → V)) := by
         funext i a
         refine Fin.cases ?_ (fun j => ?_) i
@@ -140,5 +186,30 @@ theorem reverseWindowFamily_linearIndependent
         · simp [reverseWindowFamily, newest]
       rw [hfamily]
       exact hcons
+
+/-- Uncurried form of `reverseWindowFamily`, matching the row type of the
+rectangular block-Hankel matrix. -/
+def reverseFlatWindowFamily
+    {K : Type*} [Field K] {m : ℕ}
+    (q : ℕ → (Fin m → K)) (k n : ℕ) :
+    Fin n → (Fin k × Fin m → K) :=
+  fun i a => q (n - i.1 + a.1.1) a.2
+
+/-- The delayed-pivot lemma in an uncurried row-coordinate presentation. -/
+theorem reverseFlatWindowFamily_linearIndependent
+    {K : Type*} [Field K] {m : ℕ}
+    (q : ℕ → (Fin m → K)) (k n : ℕ)
+    (hqzero : ∀ j, j < k → q j = 0)
+    (hqk : q k ≠ 0)
+    (hnk : n ≤ k) :
+    LinearIndependent K (reverseFlatWindowFamily (K := K) q k n) := by
+  let uncurryEquiv : (Fin k → Fin m → K) ≃ₗ[K]
+      (Fin k × Fin m → K) :=
+    (LinearEquiv.curry K K (Fin k) (Fin m)).symm
+  have hli := (reverseWindowFamily_linearIndependent
+      (K := K) q k n hqzero hqk hnk).map'
+    uncurryEquiv.toLinearMap (by simp)
+  simpa [reverseFlatWindowFamily, reverseWindowFamily, uncurryEquiv,
+    Function.comp_def] using hli
 
 end BarrierVerification
