@@ -16,13 +16,13 @@ def blockColumnSpan
     {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
     [AddCommGroup Y] [Module K Y]
     (G : ℕ → X →ₗ[K] Y) (h : ℕ) : Submodule K Y :=
-  Submodule.span K (blockColumnSet G h)
+  Submodule.span K (blockColumnSet (K := K) G h)
 
 theorem blockColumnSpan_mono
     {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
     [AddCommGroup Y] [Module K Y]
     (G : ℕ → X →ₗ[K] Y) {h h' : ℕ} (hh' : h ≤ h') :
-    blockColumnSpan G h ≤ blockColumnSpan G h' := by
+    blockColumnSpan (K := K) G h ≤ blockColumnSpan (K := K) G h' := by
   apply Submodule.span_mono
   intro y hy
   obtain ⟨b, hb, hy⟩ := hy
@@ -34,40 +34,45 @@ theorem exists_blockColumnSpan_plateau
     {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
     [AddCommGroup Y] [Module K Y] [FiniteDimensional K Y]
     (G : ℕ → X →ₗ[K] Y) (C t : ℕ)
-    (hnonzero : blockColumnSpan G C ≠ ⊥)
-    (hrank : Module.finrank K (blockColumnSpan G (C + t)) ≤ t) :
+    (hnonzero : blockColumnSpan (K := K) G C ≠ ⊥)
+    (hrank : Module.finrank K (blockColumnSpan (K := K) G (C + t)) ≤ t) :
     ∃ h, C ≤ h ∧ h < C + t ∧
-      blockColumnSpan G h = blockColumnSpan G (h + 1) := by
+      blockColumnSpan (K := K) G h =
+        blockColumnSpan (K := K) G (h + 1) := by
   classical
   by_contra hex
   have hstrict (i : ℕ) (hi : i < t) :
-      blockColumnSpan G (C + i) < blockColumnSpan G (C + (i + 1)) := by
-    have hle : blockColumnSpan G (C + i) ≤
-        blockColumnSpan G (C + (i + 1)) := by
-      apply blockColumnSpan_mono
+      blockColumnSpan (K := K) G (C + i) <
+        blockColumnSpan (K := K) G (C + (i + 1)) := by
+    have hle : blockColumnSpan (K := K) G (C + i) ≤
+        blockColumnSpan (K := K) G (C + (i + 1)) := by
+      apply blockColumnSpan_mono (K := K)
       omega
     apply lt_of_le_of_ne hle
     intro heq
     apply hex
     exact ⟨C + i, by omega, by omega, by simpa [Nat.add_assoc] using heq⟩
   have hgrowth : ∀ i, i ≤ t →
-      Module.finrank K (blockColumnSpan G C) + i ≤
-        Module.finrank K (blockColumnSpan G (C + i)) := by
+      Module.finrank K (blockColumnSpan (K := K) G C) + i ≤
+        Module.finrank K (blockColumnSpan (K := K) G (C + i)) := by
     intro i hi
     induction i with
     | zero => simp
     | succ i ih =>
         have hit : i < t := by omega
         have hdim :
-            Module.finrank K (blockColumnSpan G (C + i)) <
-              Module.finrank K (blockColumnSpan G (C + (i + 1))) :=
+            Module.finrank K (blockColumnSpan (K := K) G (C + i)) <
+              Module.finrank K
+                (blockColumnSpan (K := K) G (C + (i + 1))) :=
           Submodule.finrank_lt_finrank_of_lt (hstrict i hit)
         have hprev := ih (by omega)
         omega
-  have hpositive : 1 ≤ Module.finrank K (blockColumnSpan G C) :=
+  have hpositive :
+      1 ≤ Module.finrank K (blockColumnSpan (K := K) G C) :=
     Submodule.one_le_finrank_iff.2 hnonzero
   have hlarge := hgrowth t le_rfl
-  have : t + 1 ≤ Module.finrank K (blockColumnSpan G (C + t)) := by
+  have : t + 1 ≤
+      Module.finrank K (blockColumnSpan (K := K) G (C + t)) := by
     omega
   omega
 
