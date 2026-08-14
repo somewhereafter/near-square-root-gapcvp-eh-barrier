@@ -17,6 +17,12 @@ The fixed-exponent hardness baseline is Mira's formalized theorem for every
 fixed `c<1/2`, cited through the manuscript PDF and its audited public
 repository commit.
 
+The repository's Lean development now verifies the complete matrix-valued
+rectangular common-atom theorem used in the accompanying Version 2 research:
+the finite block-Hankel window, plateau state realization, generated algebra,
+joint-radical quotient, and common-atom decomposition all compile together in
+the remote `Lean verification` workflow.
+
 Build with the verified MiKTeX sequence:
 
 ```powershell

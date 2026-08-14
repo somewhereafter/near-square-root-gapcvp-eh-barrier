@@ -4,26 +4,30 @@ This directory targets the new matrix-valued rectangular common-atom lemma in
 Theorem 7.1 of Version 2. Mira's already-formalized scalar theorem is a
 dependency, not the verification target.
 
-## Current proof boundary
+## Verified theorem
 
-- `RectangularCommonAtom.lean` proves the genuinely matrix-valued spectral
-  half: from a finite monogenic realization with a jointly nondegenerate
-  matrix-valued functional satisfying the entrywise Frobenius law, it produces
-  one common atom set and nonzero coefficient matrices with entries in
-  `{0,1}`.
-- It also derives reducedness of the realization algebra from the
-  matrix-valued Frobenius law and joint nondegeneracy.
+- `RectangularCommonAtomFromWindow.lean` proves
+  `rectangularCommonAtom_from_window`, the complete rectangular common-atom
+  theorem from the finite block-Hankel hypotheses.  Under
+  `max Q (2*t-2) + 2*t <= L`, rank `t`, and the protected Frobenius identities,
+  it produces at most `t` common atoms and nonzero coefficient matrices whose
+  entries lie in `{0,1}`, recovering every requested moment through degree
+  `Q`.
+- `FiniteWindowRealization.lean` constructs the protected plateau state shift
+  from the rectangular rank window.
+- `MonogenicMatrixRealization.lean` packages that shift into the generated
+  finite algebra and transfers the entrywise Frobenius law.
+- `MatrixPairingQuotient.lean` removes the joint pairing radical.
+- `RectangularCommonAtom.lean` proves the matrix-valued spectral theorem and
+  the resulting common-atom decomposition.
 
-## Not yet verified
+## Verification status
 
-The remote Lean build is green. The protected finite-window realization
-implication is still the critical
-remaining half: the finite rectangular block-Hankel rank hypothesis and guard
-columns must construct the jointly reachable/observable monogenic realization
-used by the verified spectral theorem. Completing that bridge completes the
-new lemma. The complexity-class implications in Part I depend on cited
-published theorems and are audited at the citation level rather than re-proved
-inside Lean.
+The complete theorem and all of its supporting modules pass the repository's
+remote `Lean verification` workflow.  There is no remaining unverified half of
+the rectangular common-atom lemma.  The complexity-class implications in Part
+I depend on cited published theorems and are audited at the citation level
+rather than re-proved inside Lean.
 
 ## Build
 
