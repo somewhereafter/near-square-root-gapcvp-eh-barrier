@@ -326,4 +326,41 @@ theorem shifted_blockColumn_relation
   dsimp [W] at hcard
   omega
 
+/-- Synthesis after shifting each displayed block column once. -/
+def shiftedBlockSynthesis
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h : ℕ) :
+    (Fin (h + 1) → X) →ₗ[K] Y :=
+  ∑ b : Fin (h + 1), (G (b.1 + 1)).comp (LinearMap.proj b)
+
+@[simp]
+theorem shiftedBlockSynthesis_apply
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h : ℕ) (x : Fin (h + 1) → X) :
+    shiftedBlockSynthesis (K := K) G h x =
+      ∑ b, G (b.1 + 1) (x b) := by
+  simp [shiftedBlockSynthesis]
+
+/-- The protected-tail argument is exactly the kernel inclusion required to
+descend the formal shift to the synthesized state space. -/
+theorem ker_blockSynthesis_le_ker_shifted
+    {K : Type*} [Field K] {m : ℕ}
+    (moment : ℕ → Matrix (Fin m) (Fin m) K)
+    (k h t L : ℕ)
+    (htk : t < k)
+    (hguard : h + t + 1 ≤ L)
+    (hrank : Module.finrank K
+      (blockColumnSpan (K := K) (momentBlockColumn moment k) L) ≤ t) :
+    LinearMap.ker
+        (blockSynthesis (K := K) (momentBlockColumn moment k) h) ≤
+      LinearMap.ker
+        (shiftedBlockSynthesis (K := K) (momentBlockColumn moment k) h) := by
+  intro x hx
+  rw [LinearMap.mem_ker] at hx ⊢
+  rw [blockSynthesis_apply (K := K)] at hx
+  rw [shiftedBlockSynthesis_apply (K := K)]
+  exact shifted_blockColumn_relation moment k h t L htk hguard hrank x hx
+
 end BarrierVerification
