@@ -4,6 +4,73 @@ namespace BarrierVerification
 
 open Set
 
+/-- Vectors obtainable from one displayed block column up to index `h`. -/
+def blockColumnSet
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h : ℕ) : Set Y :=
+  {y | ∃ b, b ≤ h ∧ y ∈ LinearMap.range (G b)}
+
+/-- Span of the first `h + 1` displayed block columns. -/
+def blockColumnSpan
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h : ℕ) : Submodule K Y :=
+  Submodule.span K (blockColumnSet G h)
+
+theorem blockColumnSpan_mono
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) {h h' : ℕ} (hh' : h ≤ h') :
+    blockColumnSpan G h ≤ blockColumnSpan G h' := by
+  apply Submodule.span_mono
+  intro y hy
+  obtain ⟨b, hb, hy⟩ := hy
+  exact ⟨b, hb.trans hh', hy⟩
+
+/-- A nonzero monotone column-span chain of dimension at most `t` must
+plateau within the next `t` inclusions. -/
+theorem exists_blockColumnSpan_plateau
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y] [FiniteDimensional K Y]
+    (G : ℕ → X →ₗ[K] Y) (C t : ℕ)
+    (hnonzero : blockColumnSpan G C ≠ ⊥)
+    (hrank : Module.finrank K (blockColumnSpan G (C + t)) ≤ t) :
+    ∃ h, C ≤ h ∧ h < C + t ∧
+      blockColumnSpan G h = blockColumnSpan G (h + 1) := by
+  classical
+  by_contra hex
+  have hstrict (i : ℕ) (hi : i < t) :
+      blockColumnSpan G (C + i) < blockColumnSpan G (C + (i + 1)) := by
+    have hle : blockColumnSpan G (C + i) ≤
+        blockColumnSpan G (C + (i + 1)) := by
+      apply blockColumnSpan_mono
+      omega
+    apply lt_of_le_of_ne hle
+    intro heq
+    apply hex
+    exact ⟨C + i, by omega, by omega, by simpa [Nat.add_assoc] using heq⟩
+  have hgrowth : ∀ i, i ≤ t →
+      Module.finrank K (blockColumnSpan G C) + i ≤
+        Module.finrank K (blockColumnSpan G (C + i)) := by
+    intro i hi
+    induction i with
+    | zero => simp
+    | succ i ih =>
+        have hit : i < t := by omega
+        have hdim :
+            Module.finrank K (blockColumnSpan G (C + i)) <
+              Module.finrank K (blockColumnSpan G (C + (i + 1))) :=
+          Submodule.finrank_lt_finrank_of_lt (hstrict i hit)
+        have hprev := ih (by omega)
+        omega
+  have hpositive : 1 ≤ Module.finrank K (blockColumnSpan G C) :=
+    Submodule.one_le_finrank_iff.2 hnonzero
+  have hlarge := hgrowth t le_rfl
+  have : t + 1 ≤ Module.finrank K (blockColumnSpan G (C + t)) := by
+    omega
+  omega
+
 /-- Reverse-ordered shifted windows.  For `n > 0` these are the windows
 starting at shifts `n, n - 1, ..., 1`.  The reverse order makes the
 delayed-pivot argument an ordinary `Fin.cons` induction. -/
