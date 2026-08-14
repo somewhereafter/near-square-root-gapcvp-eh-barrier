@@ -489,4 +489,112 @@ theorem blockShiftOnPlateau_apply
         range_shiftedBlockSynthesis_le_of_plateau G h hplateau ⟨x, rfl⟩⟩ := by
   exact inducedShiftOnRange_apply _ _ _ _ x
 
+/-- Coefficients supported on one displayed block. -/
+def singleBlockCoeff
+    {X : Type*} [Zero X] (h b : ℕ) (hb : b ≤ h) (x : X) :
+    Fin (h + 1) → X :=
+  Pi.single ⟨b, by omega⟩ x
+
+@[simp]
+theorem blockSynthesis_singleBlockCoeff
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h b : ℕ) (hb : b ≤ h) (x : X) :
+    blockSynthesis (K := K) G h (singleBlockCoeff h b hb x) = G b x := by
+  rw [blockSynthesis_apply (K := K)]
+  rw [Fintype.sum_eq_single ⟨b, by omega⟩]
+  · simp [singleBlockCoeff]
+  · intro j hj
+    rw [Pi.single_eq_of_ne hj, map_zero]
+
+@[simp]
+theorem shiftedBlockSynthesis_singleBlockCoeff
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h b : ℕ) (hb : b ≤ h) (x : X) :
+    shiftedBlockSynthesis (K := K) G h (singleBlockCoeff h b hb x) =
+      G (b + 1) x := by
+  rw [shiftedBlockSynthesis_apply (K := K)]
+  rw [Fintype.sum_eq_single ⟨b, by omega⟩]
+  · simp [singleBlockCoeff]
+  · intro j hj
+    rw [Pi.single_eq_of_ne hj, map_zero]
+
+/-- The protected finite Hankel window produces an honest finite-dimensional
+state shift.  Its powers send the initial block column to every protected
+block column.  This is the finite-window realization half of the rectangular
+common-atom argument, before packaging the monogenic endomorphism algebra. -/
+theorem exists_plateau_state_shift
+    {K : Type*} [Field K] {m : ℕ}
+    (moment : ℕ → Matrix (Fin m) (Fin m) K)
+    (k C t L : ℕ)
+    (htk : t < k)
+    (hguard : C + 2 * t ≤ L)
+    (hnonzero : blockColumnSpan (K := K)
+      (momentBlockColumn moment k) C ≠ ⊥)
+    (hrank : Module.finrank K
+      (blockColumnSpan (K := K) (momentBlockColumn moment k) L) ≤ t) :
+    ∃ h (hC : C ≤ h) (hLt : h < C + t)
+      (hplateau : blockColumnSpan (K := K) (momentBlockColumn moment k) h =
+        blockColumnSpan (K := K) (momentBlockColumn moment k) (h + 1)),
+      let phi := blockSynthesis (K := K) (momentBlockColumn moment k) h
+      let psi := shiftedBlockSynthesis (K := K) (momentBlockColumn moment k) h
+      let hker : LinearMap.ker phi ≤ LinearMap.ker psi :=
+        ker_blockSynthesis_le_ker_shifted moment k h t L htk (by omega) hrank
+      let A := blockShiftOnPlateau (momentBlockColumn moment k) h hker hplateau
+      Module.finrank K (LinearMap.range phi) ≤ t ∧
+      ∀ e, e ≤ C → ∀ x : Fin m → K,
+        A ^ e
+            ⟨momentBlockColumn moment k 0 x,
+              by
+                rw [range_blockSynthesis (K := K)]
+                apply Submodule.subset_span
+                exact ⟨0, by omega, ⟨x, rfl⟩⟩⟩ =
+          ⟨momentBlockColumn moment k e x,
+            by
+              rw [range_blockSynthesis (K := K)]
+              apply Submodule.subset_span
+              exact ⟨e, by omega, ⟨x, rfl⟩⟩⟩ := by
+  classical
+  have hrankCt : Module.finrank K
+      (blockColumnSpan (K := K) (momentBlockColumn moment k) (C + t)) ≤ t := by
+    exact (Submodule.finrank_mono
+      (blockColumnSpan_mono (K := K) (momentBlockColumn moment k)
+        (by omega))).trans hrank
+  obtain ⟨h, hC, hLt, hplateau⟩ :=
+    exists_blockColumnSpan_plateau
+      (K := K) (momentBlockColumn moment k) C t hnonzero hrankCt
+  refine ⟨h, hC, hLt, hplateau, ?_, ?_⟩
+  · rw [range_blockSynthesis (K := K)]
+    exact (Submodule.finrank_mono
+      (blockColumnSpan_mono (K := K) (momentBlockColumn moment k)
+        (by omega))).trans hrank
+  · intro e he x
+    induction e with
+    | zero =>
+        simp
+    | succ e ih =>
+        have heh : e ≤ h := by omega
+        have hesh : e + 1 ≤ h := by omega
+        rw [pow_succ']
+        rw [LinearMap.mul_apply]
+        rw [ih (by omega)]
+        let coeff := singleBlockCoeff h e heh x
+        have hphi : blockSynthesis (K := K) (momentBlockColumn moment k) h coeff =
+            momentBlockColumn moment k e x := by
+          exact blockSynthesis_singleBlockCoeff _ _ _ heh _
+        have hpsi : shiftedBlockSynthesis (K := K) (momentBlockColumn moment k) h coeff =
+            momentBlockColumn moment k (e + 1) x := by
+          exact shiftedBlockSynthesis_singleBlockCoeff _ _ _ heh _
+        rw [show (⟨momentBlockColumn moment k e x, _⟩ :
+            LinearMap.range
+              (blockSynthesis (K := K) (momentBlockColumn moment k) h)) =
+            ⟨blockSynthesis (K := K) (momentBlockColumn moment k) h coeff,
+              ⟨coeff, rfl⟩⟩ by
+              apply Subtype.ext
+              exact hphi.symm]
+        rw [blockShiftOnPlateau_apply]
+        apply Subtype.ext
+        exact hpsi
+
 end BarrierVerification

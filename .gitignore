@@ -5,3 +5,4 @@
 *.out
 main.pdf
 lean-verification/.lake/
+qa-render-*/

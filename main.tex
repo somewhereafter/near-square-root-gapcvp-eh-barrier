@@ -10,6 +10,7 @@
 }
 
 \newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{remark}[theorem]{Remark}
@@ -58,8 +59,17 @@ polylogarithmic loss $f(D)=\log^{O(1)}D$ is conditionally excluded.  For
 rank-regular reductions, the first dimension-only regime not excluded by this
 argument is the superpolylogarithmic-loss strip
 $f(D)\notin\log^{O(1)}D$.  The genuinely near-square-root portion of that
-region additionally has $f(D)=D^{o(1)}$.  This is a barrier theorem, not an
-unconditional lower bound and not a construction in the surviving strip.
+  region additionally has $f(D)=D^{o(1)}$.  This is a barrier theorem, not an
+  unconditional lower bound and not a construction in the surviving strip.
+
+We also give a constant-sensitive sharpening of the Aharonov--Regev
+Fourier verifier.  For every fixed $\varepsilon>0$,
+$\GapCVP_{(2/\pi+\varepsilon)\sqrt D}$ lies in
+$\mathsf{NP}\cap\mathsf{coNP}$.  In particular,
+$\GapCVP_{\sqrt D}$ is in $\mathsf{NP}\cap\mathsf{coNP}$, so deterministic
+Karp NP-hardness at the exact unit square-root factor would imply
+$\mathsf{NP}=\mathsf{coNP}$.  This constant sharpening is proved here; it is
+not attributed to the literal published statement of Aharonov--Regev.
 \end{abstract}
 
 \section{Introduction}
@@ -103,7 +113,16 @@ second level.  Substituting (1) into (2) gives complexity
 $2^{O(\log^{2C}D)}\poly(M)$, which is quasipolynomial under any polynomial-time
 reduction.
 
-The contribution of this note is threefold.
+At the exact unit factor, a sharper barrier is available.  The theorem
+statement of Aharonov and Regev~\cite{AR05} suppresses its absolute constant,
+while their displayed proof explicitly yields the safe factor $100\sqrt D$.
+Section~\ref{sec:constant} retains the constants in the same verifier and
+proves membership for every $(2/\pi+\varepsilon)\sqrt D$.  Since $2/\pi<1$,
+exact $\sqrt D$-hardness would imply $\mathsf{NP}=\mathsf{coNP}$.  This
+confirms the endpoint consequence stated in Mira's draft~\cite{Mira26}, while
+making the published-versus-new proof boundary explicit.
+
+The contribution of this note is fourfold.
 \begin{enumerate}
   \item We state and prove the resulting architecture-independent conditional
   impossibility theorem for near-square-root $\GapCVP$ hardness.
@@ -113,6 +132,9 @@ The contribution of this note is threefold.
   \item We isolate the first asymptotic strip not covered by the
   quasipolynomial-protocol argument and separate it from the stronger AMETH
   barrier already implicit in~\cite{ABBGKLPV26}.
+  \item We prove the constant-sensitive Aharonov--Regev sharpening and its
+  $\mathsf{NP}=\mathsf{coNP}$ consequence at the exact unit square-root
+  factor.
 \end{enumerate}
 
 The theorem is conditional.  It does not show unconditionally that the
@@ -180,6 +202,159 @@ This strengthens an earlier theorem of Selman and Sengupta that obtained only
 a third-level collapse.  The distinction is important: the later argument
 extends the Boppana--H\aa stad--Zachos proof to quasipolynomial resource bounds
 before applying padding.
+
+\section{A constant-sensitive coNP barrier at the unit factor}
+\label{sec:constant}
+
+This section sharpens the constants in the verifier of Aharonov and
+Regev~\cite{AR05}.  Their published Theorem~1.1 says that
+$\GapCVP_{c\sqrt D}$ lies in $\mathsf{NP}\cap\mathsf{coNP}$ for some absolute
+$c>0$; the theorem statement leaves $c$ symbolic, while the proof explicitly
+establishes the safe choice $c=100$.  The smaller constant below is a new
+analysis of their verifier, not a value claimed in their paper.
+
+Their normalized periodic Gaussian has a Fourier distribution $\widehat f$
+on the dual lattice with two estimates:
+\begin{align}
+  \mathbb E_{w\sim\widehat f}\langle u,w\rangle^2
+    &\le \frac{1}{2\pi} &&\text{for every unit }u,       \tag{A1}\\
+  f(t)&\le 2^{-\Omega(D)}
+    &&\text{if }\operatorname{dist}(t,L)\ge a\sqrt D,
+      \quad a>\frac1{\sqrt{2\pi}}.                      \tag{A2}
+\end{align}
+They also prove an exponentially small tail above $C\sqrt D$ for every fixed
+$C>1/\sqrt{2\pi}$.  These are Lemmas~2.5, 2.6, and 3.1 of~\cite{AR05}.
+
+\begin{lemma}[Quadratic support for cosine]                 \label{lem:cosine}
+For $0\le A\le\pi/2$ and every $y\in\mathbb R$,
+\[
+  \cos(Ay)\ge
+  \cos A-\frac{A\sin A}{2}(y^2-1).                       \tag{A3}
+\]
+Consequently, if $N^{-1}\sum_i y_i^2\le1$, then
+$N^{-1}\sum_i\cos(Ay_i)\ge\cos A$.
+\end{lemma}
+
+\begin{proof}
+The claim is immediate for $A=0$, and the difference between the two sides
+is even in $y$.  For $A>0$ and $y\ge0$, let
+\[
+  g(y)=\cos(Ay)-\cos A+\frac{A\sin A}{2}(y^2-1).
+\]
+Then $g(1)=0$ and $g'(y)=A(y\sin A-\sin(Ay))$.  On $0\le y\le1$, concavity
+of sine gives $\sin(Ay)\ge y\sin A$, so $g$ decreases to zero.  On
+$1\le y\le\pi/A$, monotonicity of $\sin x/x$ on $(0,\pi)$ gives
+$\sin(Ay)\le y\sin A$.  Finally, when $y\ge\pi/A$, concavity of sine on
+$[0,\pi/2]$ gives $(\pi/A)\sin A\ge2$, while $\sin(Ay)\le1$; hence again
+$g'(y)\ge0$.  Thus $g(y)\ge0$ everywhere.  Averaging (A3) proves the final
+statement.
+\end{proof}
+
+\begin{lemma}[Constant-sensitive empirical covariance]
+For every fixed rational $\sigma^2>1/(2\pi)$, there is a polynomial
+$N=D^{O_\sigma(1)}$ and a dual-lattice witness
+$W=(w_1,\ldots,w_N)$ for which
+\[
+  \frac1NWW^{\mathsf T}\preceq
+    \sigma^2 I,                                         \tag{A4}
+\]
+and, for every fixed target satisfying (A2),
+$N^{-1}\sum_i\cos(2\pi\langle t,w_i\rangle)$ is smaller than any prescribed
+positive constant threshold.
+\end{lemma}
+
+\begin{proof}
+Put $\eta=\sigma^2-1/(2\pi)>0$.  Sample independently from $\widehat f$ and
+replace a sample by zero when its
+norm exceeds $C\sqrt D$.  For a fixed unit vector $u$, the resulting squared
+projection is in $[0,C^2D]$ and has expectation at most $1/(2\pi)$ by (A1).
+Hoeffding makes its empirical mean at most $1/(2\pi)+\eta/2$ except with
+probability $\exp(-\Omega_\eta(N/D^2))$.  Apply this estimate to a fixed
+sufficiently fine net of the unit sphere.  The net has size
+$\exp(O_\eta(D))$, and the standard positive-semidefinite net inequality
+\[
+  \|S\|_{\mathrm{op}}
+  \le (1-2\delta)^{-1}
+      \max_{u\text{ in the }\delta\text{-net}}u^{\mathsf T}Su
+\]
+turns the net bounds into (A4) when $\delta=\Theta(\eta)$.  Taking $N$ to be
+a sufficiently large polynomial of degree greater than three makes the union
+bound succeed.  The Gaussian tail bound shows simultaneously that no sampled
+vector was actually truncated.
+
+For the fixed target, the cosine average has expectation $f(t)$, which is
+exponentially small by (A2), and its summands lie in $[-1,1]$.  A second
+Hoeffding bound puts the average below any fixed positive threshold.  The
+intersection of these events has positive probability, proving the existence
+of one polynomial-size witness.  All retained vectors have polynomially
+bounded norm and therefore polynomial encoding length, as in the precision
+analysis of~\cite{AR05}.  Because $\sigma^2$ and the witness entries are
+rational, the covariance test is an exact polynomial-time rational
+positive-semidefiniteness check.
+\end{proof}
+
+\begin{theorem}[Constant-sensitive Aharonov--Regev sharpening]
+\label{thm:arsharp}
+For every fixed $\varepsilon>0$,
+\[
+  \GapCVP_{(2/\pi+\varepsilon)\sqrt D}
+    \in\mathsf{NP}\cap\mathsf{coNP}.                    \tag{A5}
+\]
+Consequently $\GapCVP_{\sqrt D}\in\mathsf{NP}\cap\mathsf{coNP}$.
+\end{theorem}
+
+\begin{proof}
+NP membership is standard, so it remains to certify far instances.  Fix a
+rational $\sigma^2>1/(2\pi)$ and require (A4).  If the target is
+within distance $b$ of the lattice, periodicity reduces it to a vector $x$
+with $\|x\|\le b$.  The case $x=0$ is immediate.  Otherwise put
+\[
+  y_i=\frac{\langle x,w_i\rangle}{\sigma\|x\|},
+  \qquad A=2\pi\sigma\|x\|.
+\]
+Equation (A4) gives $N^{-1}\sum_i y_i^2\le1$.  If
+$b<1/(4\sigma)$, then $A<\pi/2$, and Lemma~\ref{lem:cosine} gives
+\[
+  \frac1N\sum_i\cos(2\pi\langle x,w_i\rangle)
+    \ge\cos(2\pi\sigma\|x\|)
+    \ge\cos(2\pi\sigma b)>0.                            \tag{A6}
+\]
+Choose a rational verification threshold strictly between zero and the last
+quantity.  No witness passing (A4) can cross this threshold on a close
+instance.  Conversely, the empirical-covariance lemma and (A2) provide a
+witness below the threshold whenever the distance is at least $a\sqrt D$
+with $a>1/\sqrt{2\pi}$.
+
+After rescaling the close radius $b$ to one, the approximation factor is
+$(a/b)\sqrt D$.  Sending
+\[
+  a\downarrow\frac1{\sqrt{2\pi}},\qquad
+  \sigma^2\downarrow\frac1{2\pi},\qquad
+  b\uparrow\frac{\sqrt{2\pi}}4
+\]
+makes $a/b\downarrow2/\pi$.  Fixed parameters can therefore be chosen with
+$a/b<2/\pi+\varepsilon$, and promise monotonicity gives (A5).  Choosing
+$\varepsilon<1-2/\pi$ yields the unit-factor statement.
+\end{proof}
+
+\begin{corollary}[Exact square-root hardness consequence]
+\label{cor:npconp}
+If $\GapCVP_{\sqrt D}$ is NP-hard under deterministic promise-preserving
+many-one reductions, then $\mathsf{NP}=\mathsf{coNP}$.
+\end{corollary}
+
+\begin{proof}
+Theorem~\ref{thm:arsharp} puts the target problem in coNP.  Composing a Karp
+reduction from SAT with its verifier gives $\mathsf{NP}\subseteq\mathsf{coNP}$;
+taking complements gives the reverse containment.
+\end{proof}
+
+Thus the exact unit-factor hardness statement is false under
+$\mathsf{NP}\ne\mathsf{coNP}$.  Without a separation assumption it remains
+logically open: the containment proves the collapse consequence, not the
+unconditional nonexistence of a reduction.  Independently, the universal
+coAM protocol used below gives the EH-noncollapse and AMETH barriers without
+any leading-constant ambiguity.
 
 \section{The quantitative \texorpdfstring{$\coAM$}{coAM} protocol}
 
@@ -463,6 +638,13 @@ not merely a defect of one known construction: no polynomial-time Karp
 reduction can reach the fixed-polylogarithmic-loss endpoint.  It does not rule
 out an improvement into the superpolylogarithmic strip (12).
 
+At exponent $1/2$, the leading constant matters.  Theorem~\ref{thm:arsharp}
+gives a coNP barrier for every fixed factor
+$\lambda\sqrt D$ with $\lambda>2/\pi$, including the exact unit factor.
+For smaller positive constants, the polynomial-time coAM barrier still gives
+the usual polynomial-hierarchy collapse consequence, but the present
+constant-sensitive argument does not claim coNP membership.
+
 \section{Conclusion}
 
 The quantitative $\coAM$ protocol for Euclidean $\GapCVP$ and the
@@ -477,6 +659,16 @@ conditional boundary:
 This makes any such hardness proof simultaneously a hierarchy-collapse proof.
 Assuming EH noncollapse, the fixed-polylogarithmic-loss endpoint is closed.
 
+At the exact factor $\sqrt D$, the conclusion is stronger:
+\[
+  \boxed{
+  \text{NP-hardness of }\GapCVP_{\sqrt D}
+  \Longrightarrow \mathsf{NP}=\mathsf{coNP}.}
+\]
+This uses the verified constant-sensitive sharpening in
+Theorem~\ref{thm:arsharp}; the published Aharonov--Regev theorem itself states
+only the existence of an absolute constant and displays the safe value $100$.
+
 The next unresolved asymptotic target, for rank-regular reductions and under
 that assumption alone, is hardness with a loss that is simultaneously
 superpolylogarithmic and subpolynomial, schematically
@@ -488,7 +680,9 @@ the quasipolynomial-$\coAM$ zone.  Establishing hardness there would require a
 new reduction; excluding it would require an assumption or upper bound
 stronger than EH noncollapse.
 
+{\small
 \bibliographystyle{alpha}
 \bibliography{references}
+}
 
 \end{document}
