@@ -2,3 +2,4 @@ import BarrierVerification.FiniteWindowRealization
 
 #print axioms BarrierVerification.matrixCommonAtomOfRealization
 #print axioms BarrierVerification.reverseWindowFamily_linearIndependent
+#print axioms BarrierVerification.matrixQuotientFunctional_jointNondegenerate

@@ -1,4 +1,4 @@
-import BarrierVerification.RectangularCommonAtom
+import BarrierVerification.MatrixPairingQuotient
 
 namespace BarrierVerification
 
