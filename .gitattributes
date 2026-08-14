@@ -1,0 +1,8 @@
+*.md text eol=lf
+*.tex text eol=lf
+*.bib text eol=lf
+AUTHOR_SIGNING_KEY.pub text eol=lf
+allowed_signers text eol=lf
+SHA256SUMS -text
+SHA256SUMS.sig -text
+*.pdf -text

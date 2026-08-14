@@ -1,0 +1,494 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={Near-Square-Root NP-Hardness for Euclidean CVP Would Collapse the Exponential Hierarchy},
+  pdfauthor={somewhereafter},
+  pdfsubject={A conditional exponential-hierarchy barrier for near-square-root Euclidean GapCVP hardness}
+}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{\par\noindent\textit{Proof.}\ }{\hfill$\square$\par}
+
+\newcommand{\GapCVP}{\mathsf{GapCVP}}
+\newcommand{\coAM}{\mathsf{coAM}}
+\newcommand{\AM}{\mathsf{AM}}
+\newcommand{\qpoly}{\mathsf{qpoly}}
+\newcommand{\EXP}{\mathsf{EXP}}
+\newcommand{\EH}{\mathsf{EH}}
+\newcommand{\PH}{\mathsf{PH}}
+\newcommand{\poly}{\operatorname{poly}}
+\newcommand{\TAUT}{\mathsf{TAUT}}
+
+\title{Near-Square-Root NP-Hardness for Euclidean CVP\\
+Would Collapse the Exponential Hierarchy}
+\author{somewhereafter}
+\date{August 14, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Aggarwal, Bennett, Brakerski, Golovnev, Kumar, Li, Peters,
+Stephens-Davidowitz, and Vaikuntanathan proved a quantitative public-coin
+protocol placing rank-$D$ Euclidean $\GapCVP_\gamma$ in $\coAM$ with
+complexity $2^{O(D/\gamma^2)}$ up to polynomial factors.  We record a
+consequence at the near-square-root approximation frontier.  If, for any
+fixed $C>0$, Euclidean
+\[
+  \GapCVP_{\sqrt D/\log^C D}
+\]
+is NP-hard under polynomial-time promise-preserving many-one reductions,
+then the exponential hierarchy collapses to its second level.  The proof
+combines the quantitative lattice protocol with the resource-scaled
+Boppana--H\aa stad--Zachos theorem of Pavan, Selman, Sengupta, and
+Vinodchandran.
+
+More generally, for a reduction from inputs of length $n$ producing rank
+$D(n)$ and approximation $\gamma(D(n))$, the same conclusion follows whenever
+$D(n)/\gamma(D(n))^2=\log^{O(1)}n$.  Writing
+$\gamma(D)=\sqrt D/f(D)$ exposes the exact protocol frontier: every fixed
+polylogarithmic loss $f(D)=\log^{O(1)}D$ is conditionally excluded.  For
+rank-regular reductions, the first dimension-only regime not excluded by this
+argument is the superpolylogarithmic-loss strip
+$f(D)\notin\log^{O(1)}D$.  The genuinely near-square-root portion of that
+region additionally has $f(D)=D^{o(1)}$.  This is a barrier theorem, not an
+unconditional lower bound and not a construction in the surviving strip.
+\end{abstract}
+
+\section{Introduction}
+
+The Euclidean closest vector problem asks for the distance from a target
+$t\in\mathbb{Q}^D$ to a full-rank lattice $L\subseteq\mathbb{R}^D$.
+Its promise version $\GapCVP_\gamma$ distinguishes
+\[
+  \operatorname{dist}(t,L)\le r
+  \qquad\text{from}\qquad
+  \operatorname{dist}(t,L)>\gamma(D)r.
+\]
+The square-root scale is a persistent boundary in the complexity of lattice
+problems, beginning with the classical coAM barrier of Goldreich and
+Goldwasser~\cite{GG00}.  A particularly sharp prospective hardness factor is
+\[
+  \gamma_C(D)=\frac{\sqrt D}{\log^C D},                 \tag{1}
+\]
+where $C>0$ is fixed.  This factor is $D^{1/2-o(1)}$ and is asymptotically
+larger than $D^c$ for every fixed $c<1/2$.
+It should be compared with Mira's formalized NP-hardness theorem at $D^c$ for
+every fixed $c<1/2$~\cite{Mira26}.
+
+Our main observation is that (1) is already inside a universal
+quasipolynomial-time $\coAM$ regime.  This fact has a stronger consequence
+than a construction-specific obstruction: polynomial-time NP-hardness at
+(1) would collapse the exponential hierarchy.  No classification of lattice
+gadgets, codes, Fourier witnesses, or source compilers is needed.
+
+The ingredients are published.  Aggarwal et al.~\cite{ABBGKLPV26} prove the
+time--approximation tradeoff
+\[
+  \GapCVP_\gamma\in\coAM\text{-TIME}
+  \left(2^{O(D/\gamma^2)}\poly(M)\right),               \tag{2}
+\]
+where $M$ is the target-instance encoding length.  Pavan et
+al.~\cite{PSSV07} prove a resource-scaled extension of the
+Boppana--H\aa stad--Zachos collapse theorem~\cite{BHZ87}: quasipolynomial
+Arthur--Merlin protocols for coNP collapse the exponential hierarchy to its
+second level.  Substituting (1) into (2) gives complexity
+$2^{O(\log^{2C}D)}\poly(M)$, which is quasipolynomial under any polynomial-time
+reduction.
+
+The contribution of this note is threefold.
+\begin{enumerate}
+  \item We state and prove the resulting architecture-independent conditional
+  impossibility theorem for near-square-root $\GapCVP$ hardness.
+  \item We give the source-sensitive form
+  $D(n)/\gamma(D(n))^2=\log^{O(1)}n$, avoiding an implicit assumption that
+  target rank and source length are polynomially equivalent.
+  \item We isolate the first asymptotic strip not covered by the
+  quasipolynomial-protocol argument and separate it from the stronger AMETH
+  barrier already implicit in~\cite{ABBGKLPV26}.
+\end{enumerate}
+
+The theorem is conditional.  It does not show unconditionally that the
+reduction cannot exist.  Rather, a correct reduction would itself establish
+a major and unexpected collapse of complexity classes.
+
+\section{Preliminaries}
+
+\subsection{Promise hardness}
+
+We use deterministic polynomial-time promise-preserving many-one reductions.
+If $A$ is a language and $\Pi=(\Pi_Y,\Pi_N)$ is a promise problem, a reduction
+$R$ satisfies
+\[
+  x\in A\Rightarrow R(x)\in\Pi_Y,
+  \qquad
+  x\notin A\Rightarrow R(x)\in\Pi_N.
+\]
+We call $\Pi$ NP-hard if such a reduction exists from an NP-complete language.
+
+Let $n$ denote source length, $M(n)$ the bit length of the emitted lattice
+instance, and $D(n)$ its rank.  Polynomial time implies
+\[
+  M(n)\le n^{O(1)},\qquad D(n)\le M(n).                 \tag{3}
+\]
+We do not assume a polynomial lower bound on $D(n)$ unless stated.
+
+\subsection{Quasipolynomial and exponential resources}
+
+Write
+\[
+  \qpoly(n)=2^{(\log n)^{O(1)}}.
+\]
+The class $\AM_{\qpoly}$ consists of languages with constant-round public-coin
+protocols whose verifier time, randomness, and total communication are
+quasipolynomial.  Define $\PH_{\qpoly}$ by allowing a fixed number of
+alternations with quasipolynomial resources.
+
+The exponential hierarchy is
+\[
+  \EH=\bigcup_{k\ge1}\Sigma_k^{\EXP}.
+\]
+We use the following published collapse theorem.
+
+\begin{theorem}[Pavan--Selman--Sengupta--Vinodchandran
+\cite{PSSV07}]                                                    \label{thm:pssv}
+If $\mathsf{coNP}\subseteq\AM_{\qpoly}$, then
+\[
+  \PH_{\qpoly}\subseteq\AM_{\qpoly}
+\]
+and, by padding,
+\[
+  \EH\subseteq\AM_{\EXP}.
+\]
+The standard containment
+$\AM_{\EXP}\subseteq\Sigma_2^{\EXP}\cap\Pi_2^{\EXP}$, together with
+$\Sigma_2^{\EXP}\subseteq\EH$, therefore gives
+\[
+  \EH=\AM_{\EXP}\subseteq\Pi_2^{\EXP}.
+\]
+Consequently the exponential hierarchy collapses to its second level.
+\end{theorem}
+
+This strengthens an earlier theorem of Selman and Sengupta that obtained only
+a third-level collapse.  The distinction is important: the later argument
+extends the Boppana--H\aa stad--Zachos proof to quasipolynomial resource bounds
+before applying padding.
+
+\section{The quantitative \texorpdfstring{$\coAM$}{coAM} protocol}
+
+Aggarwal et al. prove the following tradeoff.
+
+\begin{theorem}[Aggarwal et al.]                                  \label{thm:coam}
+Corollary 3.3 of~\cite{ABBGKLPV26} states that for every
+$\gamma=\gamma(D)\ge1$, rank-$D$ Euclidean
+$\GapCVP_\gamma$ has a constant-round $\coAM$ protocol of complexity
+\[
+  2^{O(D/\gamma^2)}\poly(M),                              \tag{4}
+\]
+where $M$ is the input encoding length.
+\end{theorem}
+
+The underlying private-coin protocol performs
+\[
+  N_2=10D^{3/2}(1-1/\gamma^2)^{-(D+1)/2}                 \tag{5}
+\]
+independent trials.  In each trial Arthur chooses a hidden uniform bit and a
+uniform point in one of two translated Euclidean balls; Merlin must identify
+the hidden translate.  Generic private-to-public-coin and round-reduction
+transformations incur polynomial overhead, preserving the exponent in (4).
+
+For $\gamma(D)=\sqrt D/f(D)$, (4) becomes
+\[
+  2^{O(f(D)^2)}\poly(M).                                  \tag{6}
+\]
+Equation (6) is the only lattice-specific input needed below.
+
+\section{The hierarchy-collapse barrier}
+
+We first state the source-sensitive theorem.
+
+\begin{theorem}[General reduction barrier]                         \label{thm:general}
+Suppose there is a deterministic polynomial-time promise-preserving many-one
+reduction from $\mathsf{SAT}$ instances of length $n$ to Euclidean
+$\GapCVP_{\gamma}$ instances of rank $D(n)$ and encoding length $M(n)$.
+If, for some fixed $a$,
+\[
+  \frac{D(n)}{\gamma(D(n))^2}\le (\log n)^a              \tag{7}
+\]
+for all sufficiently large $n$, then
+\[
+  \EH=\AM_{\EXP}\subseteq\Pi_2^{\EXP}.
+\]
+In particular, the exponential hierarchy collapses to its second level.
+\end{theorem}
+
+\begin{proof}
+By Theorem~\ref{thm:coam}, the target promise problem has a $\coAM$ protocol
+of complexity
+\[
+  2^{O(D(n)/\gamma(D(n))^2)}\poly(M(n)).
+\]
+Equations (3) and (7) make this quantity quasipolynomial in $n$.  Composing
+the verifier with the deterministic reduction gives
+\[
+  \mathsf{SAT}\in\coAM_{\qpoly},
+\]
+and complementing gives $\TAUT\in\AM_{\qpoly}$.  Since $\TAUT$ is
+coNP-complete under polynomial-time many-one reductions,
+\[
+  \mathsf{coNP}\subseteq\AM_{\qpoly}.
+\]
+The conclusion follows from Theorem~\ref{thm:pssv}.
+\end{proof}
+
+\begin{corollary}[Fixed-polylogarithmic loss]                       \label{cor:polylog}
+For every fixed $C>0$, if
+\[
+  \GapCVP_{\sqrt D/\log^C D}
+\]
+is NP-hard under polynomial-time promise-preserving many-one reductions, then
+the exponential hierarchy collapses to its second level.
+\end{corollary}
+
+\begin{proof}
+Here
+\[
+  \frac{D}{\gamma(D)^2}=\log^{2C}D.
+\]
+Since $D(n)\le M(n)\le n^{O(1)}$, this is $\log^{O(1)}n$, so
+Theorem~\ref{thm:general} applies.
+\end{proof}
+
+\begin{corollary}[Conditional impossibility]
+Assume that the exponential hierarchy does not collapse to its second level.
+Then, for every fixed $C>0$, Euclidean
+$\GapCVP_{\sqrt D/\log^C D}$ is not NP-hard under deterministic
+polynomial-time promise-preserving many-one reductions.
+\end{corollary}
+
+This conclusion is independent of the internal form of the reduction.  It
+applies equally to reductions built from codes, PCPs, Fourier statistics,
+group actions, geometric gadgets, or any other polynomial-time compiler.
+
+\section{The exact asymptotic frontier of this argument}
+
+Write the approximation factor as
+\[
+  \gamma(D)=\frac{\sqrt D}{f(D)},                         \tag{8}
+\]
+where $f(D)$ is the loss from the square-root scale.  Theorem~\ref{thm:general}
+becomes the following exact criterion.
+
+\begin{proposition}[Protocol-frontier criterion]                   \label{prop:frontier}
+A polynomial-time reduction with loss $f$ implies the second-level
+exponential-hierarchy collapse whenever
+\[
+  f(D(n))^2=\log^{O(1)}n.                                 \tag{9}
+\]
+In particular, every dimension-only bound
+\[
+  f(D)=\log^{O(1)}D                                      \tag{10}
+\]
+satisfies (9) for every polynomial-time reduction.
+\end{proposition}
+
+The converse is deliberately not claimed.  If $f(D)$ is superpolylogarithmic
+in $D$, condition (9) may still hold when the reduction emits unusually small
+rank relative to source length.  To state a clean dimension-only boundary,
+one may impose the natural rank-regularity condition
+\[
+  D(n)\ge n^{\delta}                                     \tag{11}
+\]
+for some fixed $\delta>0$.
+
+\begin{corollary}[Rank-regular boundary]
+Under (11), the protocol in (4) has quasipolynomial complexity precisely when
+\[
+  f(D)=\log^{O(1)}D
+\]
+along the output ranks, up to the usual eventual-bound interpretation.
+Thus the first dimension-only region not covered by the EH-noncollapse
+argument consists of losses not bounded by any fixed polylogarithm.  The
+near-square-root portion of this region is
+\[
+  \log^C D=o(f(D))\text{ for every fixed }C,
+  \qquad f(D)=D^{o(1)},
+  \qquad
+  \gamma(D)=\frac{\sqrt D}{\log^{\omega(1)}D}.           \tag{12}
+\]
+\end{corollary}
+
+There is no smallest superpolylogarithmic function.  Equation (12) describes
+a boundary class, not one canonical approximation factor.  Examples include
+\[
+  f(D)=\exp((\log\log D)^{1+\varepsilon})
+  \quad\text{and}\quad
+  f(D)=\exp(\sqrt{\log D}).
+\]
+Both give $\gamma(D)=D^{1/2-o(1)}$, which is asymptotically larger than
+$D^c$ for every fixed $c<1/2$, while the protocol in (6) is
+superquasipolynomial.
+
+Failure of the present argument in (12) is not evidence that hardness exists
+there.  It says only that the published quantitative $\coAM$ protocol no
+longer places the composed source problem in $\AM_{\qpoly}$.
+
+\section{The stronger AMETH boundary}
+
+Aggarwal et al. define AMETH as the assertion that, for some $\varepsilon>0$,
+$3$-$\TAUT$ has no constant-round public-coin protocol of complexity
+$2^{\varepsilon n}$.  The same composition gives a stronger but less
+structural conditional barrier.  Here, unlike in Sections 2--5, $n$ denotes
+the number of variables.  We restrict the proposed reduction to $3$-CNF
+formulas with $O(n)$ clauses and let $D(n)$ be the largest emitted rank on
+those inputs.  Their encoding length is $O(n)$; the standard sparsification
+lemma~\cite{IPZ01} lifts any $2^{o(n)}$ protocol for this sparse restriction to a
+$2^{\delta n+o(n)}$ protocol for general $3$-$\TAUT$, for every fixed
+$\delta>0$.
+
+\begin{proposition}[AMETH barrier]                                \label{prop:ameth}
+Under AMETH, no reduction as in Theorem~\ref{thm:general} can satisfy
+\[
+  \frac{D(n)}{\gamma(D(n))^2}=o(n).                       \tag{13}
+\]
+on all $3$-CNF inputs with $n$ variables and $O(n)$ clauses.
+Equivalently, for (8), it cannot satisfy
+\[
+  f(D(n))^2=o(n).                                         \tag{14}
+\]
+\end{proposition}
+
+\begin{proof}
+Equations (4) and (13) give a $2^{o(n)}$ constant-round protocol for sparse
+$3$-$\TAUT$.  Apply the sparsification lemma and run the resulting sparse protocols in
+parallel.  For every fixed $\delta>0$, this gives a constant-round protocol
+of complexity $2^{\delta n+o(n)}$ for general $3$-$\TAUT$.  Taking
+$\delta$ below the constant in AMETH yields a contradiction.
+\end{proof}
+
+If $D(n)\le n^K$ for fixed $K$ and $f(D)=D^{o(1)}$, then
+$f(D(n))^2=n^{o(1)}=o(n)$.  Hence AMETH excludes the entire
+$D^{1/2-o(1)}$ approximation regime for polynomial-output reductions, not
+only fixed-polylogarithmic losses.  The superpolylogarithmic strip (12) is
+therefore open only relative to the weaker EH-noncollapse assumption; it is
+already forbidden by AMETH.
+
+For a fixed-power factor $\gamma(D)=D^c$, the protocol exponent is
+$D^{1-2c}$.  If $D(n)\le n^K$, AMETH forces the efficiency ceiling
+\[
+  K(1-2c)\not<1,
+  \qquad\text{or heuristically}\qquad
+  c\le\frac12-\frac{1}{2K},                              \tag{15}
+\]
+unless constants or lower-order behavior keep (13) from holding.  Thus
+hardness for every fixed $c<1/2$ can coexist with the barrier when approaching
+$1/2$ requires an unbounded output-degree parameter; a uniform
+$D^{1/2-o(1)}$ theorem cannot.
+
+\section{Why the protocol does not give a deterministic algorithm}
+
+The conclusion of Corollary~\ref{cor:polylog} is an interactive-proof
+collapse, not a quasipolynomial-time algorithm for $\GapCVP$.  This distinction
+cannot be removed by naively enumerating Arthur's random coins.
+
+The private protocol underlying (4) uses $N_2$ independent hidden bits even
+before accounting for the random convex-body samples.  Therefore its written
+implementation consumes at least $N_2$ random bits.  At the near-square-root
+endpoint, substituting $\gamma=\sqrt D/f(D)$ into (5) gives
+\[
+  \log N_2
+  =\log 10+\frac32\log D+\frac12f(D)^2
+   +O\!\left(\frac{f(D)^2+f(D)^4}{D}\right).             \tag{16}
+\]
+Thus $N_2=2^{\log^{O(1)}D}$ for polylogarithmic $f$, and exhaustive
+enumeration costs
+\[
+  2^{\Omega(N_2)},
+\]
+not quasipolynomial time.  Corollary 3.3 of~\cite{ABBGKLPV26} invokes generic
+Goldwasser--Sipser~\cite{GS89} and Babai--Moran~\cite{BM88}
+transformations with polynomial overhead;
+it does not replace the experiment by a pairwise-independent test with a
+logarithmic seed.
+
+More precisely, let $\ell$ be the amplified private random-tape length in the
+Goldwasser--Sipser simulation.  Its explicit public-coin implementation uses
+full random linear maps and at least $2\ell^2$ public random bits at an
+intermediate stage.  Since $\ell\ge N_2$, enumerating those public strings
+already costs $2^{\Omega(N_2^2)}$.  The final Babai--Moran transformation is
+stated only with polynomial resource overhead and supplies no alternative
+polylogarithmic seed bound.  Pairwise-universal hashing in the proof therefore
+does not amount to a short-seed derandomization.
+
+Nor can a standard pseudorandom generator simply be substituted.  In a
+public-coin protocol Merlin's response depends on the revealed coins, and
+soundness quantifies over all prover strategies.  Fooling a fixed
+space-bounded computation is not by itself a derandomization of this
+interactive maximum.  Accordingly, this note claims
+$\mathsf{coNP}\subseteq\AM_{\qpoly}$ under the hypothetical hardness
+reduction, but not $\mathsf{coNP}\subseteq\mathsf{QP}$ and not a
+deterministic quasipolynomial-time algorithm for $\GapCVP$.
+
+One may obtain the standard nonuniform containment
+\[
+  \coAM_{\qpoly}\subseteq\mathsf{coNP}/\qpoly
+\]
+by fixing a quasipolynomial-size advice list of public strings after
+amplification and a union bound over all inputs of a given length.  The advice
+slash is essential; this is not a uniform seed-enumeration algorithm and is
+not used in our main theorem.
+
+\section{Relation to fixed-exponent hardness}
+
+Mira (\texttt{@\_Mira\_\_\_Mira\_}) proves NP-hardness at $D^c$ for every
+fixed $c<1/2$~\cite{Mira26}.  This theorem does not diagonalize to (1): each
+fixed exponent corresponds to polynomial loss
+\[
+  f(D)=D^{1/2-c},
+\]
+whereas (1) has only polylogarithmic loss.  A family of separate reductions,
+one for each fixed $c$, need not yield a single polynomial-time reduction with
+$c=c(D)\to1/2$.  Typically the polynomial degree of the output size depends on
+$c$ and becomes unbounded as $c\to1/2$.
+
+Under EH noncollapse, Corollary~\ref{cor:polylog} says that this distinction is
+not merely a defect of one known construction: no polynomial-time Karp
+reduction can reach the fixed-polylogarithmic-loss endpoint.  It does not rule
+out an improvement into the superpolylogarithmic strip (12).
+
+\section{Conclusion}
+
+The quantitative $\coAM$ protocol for Euclidean $\GapCVP$ and the
+resource-scaled interactive-proof collapse theorem together give a universal
+conditional boundary:
+\[
+  \boxed{
+  \text{NP-hardness at }\sqrt D/\log^{O(1)}D
+  \Longrightarrow
+  \text{the exponential hierarchy collapses to level two}.}
+\]
+This makes any such hardness proof simultaneously a hierarchy-collapse proof.
+Assuming EH noncollapse, the fixed-polylogarithmic-loss endpoint is closed.
+
+The next unresolved asymptotic target, for rank-regular reductions and under
+that assumption alone, is hardness with a loss that is simultaneously
+superpolylogarithmic and subpolynomial, schematically
+\[
+  \frac{\sqrt D}{\log^{\omega(1)}D}.
+\]
+This strip lies strictly beyond every fixed power $D^c$, $c<1/2$, but outside
+the quasipolynomial-$\coAM$ zone.  Establishing hardness there would require a
+new reduction; excluding it would require an assumption or upper bound
+stronger than EH noncollapse.
+
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
