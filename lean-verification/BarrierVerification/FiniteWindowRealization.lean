@@ -113,7 +113,11 @@ theorem range_blockSynthesis
     let ib : Fin (h + 1) := ⟨b, by omega⟩
     refine ⟨Pi.single ib x, ?_⟩
     rw [blockSynthesis_apply (K := K)]
-    rw [Fintype.sum_eq_single ib] <;> simp [ib]
+    rw [Fintype.sum_eq_single ib]
+    · rw [Pi.single_eq_same]
+      simp [ib]
+    · intro j hj
+      rw [Pi.single_eq_of_ne (Ne.symm hj), map_zero]
 
 /-- Flattening the coefficient blocks turns block synthesis into ordinary
 matrix-vector multiplication by the rectangular block-Hankel matrix. -/
@@ -126,6 +130,7 @@ theorem blockSynthesis_comp_curry_eq_mulVecLin
   apply LinearMap.ext
   intro x
   funext ai
+  rcases ai with ⟨a, i⟩
   simp [blockSynthesis_apply, rectangularBlockHankel, Matrix.mulVec,
     dotProduct, Fintype.sum_prod_type]
 
@@ -279,6 +284,8 @@ theorem reverseFlatWindowFamily_linearIndependent
     rfl
   apply LinearIndependent.of_comp
     (LinearEquiv.curry K K (Fin k) (Fin m)).toLinearMap
+  change LinearIndependent K
+    (fun i => Function.curry (reverseFlatWindowFamily (K := K) q k n i))
   rw [hfamily]
   exact
     (reverseWindowFamily_linearIndependent
@@ -426,10 +433,13 @@ theorem inducedShiftOnRange_apply
     inducedShiftOnRange phi psi hker hrange
         ⟨phi x, ⟨x, rfl⟩⟩ =
       ⟨psi x, hrange ⟨x, rfl⟩⟩ := by
-  simp only [inducedShiftOnRange,
-    LinearMap.quotKerEquivRange_symm_apply_image, LinearMap.comp_apply,
+  change
+    (LinearMap.ker phi).liftQ
+        (psi.codRestrict (LinearMap.range phi) fun y => hrange ⟨y, rfl⟩) _
+        (phi.quotKerEquivRange.symm ⟨phi x, ⟨x, rfl⟩⟩) =
+      ⟨psi x, hrange ⟨x, rfl⟩⟩
+  rw [LinearMap.quotKerEquivRange_symm_apply_image,
     Submodule.liftQ_apply]
-  rfl
 
 /-- At a plateau, shifting the displayed block columns introduces no new
 state direction. -/
