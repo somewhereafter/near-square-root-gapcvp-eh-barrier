@@ -87,12 +87,21 @@ theorem rectangularCommonAtom_from_window
       ext i j
       have hstate := hpower e he (Pi.single j (1 : K))
       have hentry := congrArg (fun w => output w i) hstate
-      simpa [lambda, stateMatrixFunctional, input, output, shift, W,
-        phi, psi, hker, generatedShift, Matrix.mulVec_single_one] using hentry
+      change output ((shift ^ e) (input (Pi.single j (1 : K)))) i = moment e i j
+      have hinput : input (Pi.single j (1 : K)) =
+          ⟨momentBlockColumn moment k 0 (Pi.single j (1 : K)),
+            by
+              rw [range_blockSynthesis (K := K)]
+              apply Submodule.subset_span
+              exact ⟨0, by omega, ⟨Pi.single j (1 : K), rfl⟩⟩⟩ := by
+        apply Subtype.ext
+        rfl
+      rw [hinput]
+      exact hentry
     have hfinGenerated : Module.finrank K (Algebra.adjoin K {shift}) ≤ t :=
       (finrank_generatedShift_le shift).trans hfinW
     exact matrixCommonAtomOfGeneratedFunctional shift moment lambda htk
-      (le_max_left Q (2 * t - 2)) (by dsimp [C]; omega)
+      (le_max_left Q (2 * t - 2)) (by omega)
       hfinGenerated hmoment hfrob
 
 end BarrierVerification
