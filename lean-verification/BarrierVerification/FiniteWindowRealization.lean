@@ -212,4 +212,77 @@ theorem reverseFlatWindowFamily_linearIndependent
   simpa [reverseFlatWindowFamily, reverseWindowFamily, uncurryEquiv,
     Function.comp_def] using hli
 
+/-- Any relation among the first `h + 1` block columns remains a relation
+after shifting every column once, provided the protected right tail contains
+`t + 1` further shifts and the entire column space has dimension at most
+`t < k`. -/
+theorem shifted_blockColumn_relation
+    {K : Type*} [Field K] {m : ℕ}
+    (moment : ℕ → Matrix (Fin m) (Fin m) K)
+    (k h t L : ℕ)
+    (htk : t < k)
+    (hguard : h + t + 1 ≤ L)
+    (hrank : Module.finrank K
+      (blockColumnSpan (K := K) (momentBlockColumn moment k) L) ≤ t)
+    (x : Fin (h + 1) → (Fin m → K))
+    (hrel : ∑ b, momentBlockColumn moment k b.1 (x b) = 0) :
+    ∑ b, momentBlockColumn moment k (b.1 + 1) (x b) = 0 := by
+  classical
+  let q : ℕ → (Fin m → K) := relationMoment moment x
+  let W : Submodule K (Fin k × Fin m → K) :=
+    blockColumnSpan (K := K) (momentBlockColumn moment k) L
+  have hwindow_zero :
+      (fun ai : Fin k × Fin m => q ai.1.1 ai.2) = 0 := by
+    rw [show (fun ai : Fin k × Fin m => q ai.1.1 ai.2) =
+        (fun ai => relationMoment moment x (0 + ai.1.1) ai.2) by
+          funext ai
+          simp [q]]
+    rw [relationMoment_window_eq]
+    simpa using hrel
+  have hqzero : ∀ j, j < k → q j = 0 := by
+    intro j hj
+    funext i
+    have h := congrFun hwindow_zero (⟨⟨j, hj⟩, i⟩)
+    simpa using h
+  by_contra hshift
+  have hqk : q k ≠ 0 := by
+    intro hqkzero
+    apply hshift
+    rw [← relationMoment_window_eq moment x k 1]
+    funext ai
+    change q (1 + ai.1.1) ai.2 = 0
+    by_cases hlt : 1 + ai.1.1 < k
+    · rw [hqzero _ hlt]
+      rfl
+    · have heq : 1 + ai.1.1 = k := by omega
+      rw [heq, hqkzero]
+      rfl
+  have hfam_li : LinearIndependent K
+      (reverseFlatWindowFamily (K := K) q k (t + 1)) :=
+    reverseFlatWindowFamily_linearIndependent
+      (K := K) q k (t + 1) hqzero hqk (by omega)
+  have hfam_mem (i : Fin (t + 1)) :
+      reverseFlatWindowFamily (K := K) q k (t + 1) i ∈ W := by
+    let s := t + 1 - i.1
+    have heq := relationMoment_window_eq moment x k s
+    change (fun ai : Fin k × Fin m => q (s + ai.1.1) ai.2) ∈ W
+    rw [show (fun ai : Fin k × Fin m => q (s + ai.1.1) ai.2) =
+        (fun ai => relationMoment moment x (s + ai.1.1) ai.2) by
+          funext ai
+          rfl]
+    rw [heq]
+    apply Submodule.sum_mem
+    intro b _hb
+    apply Submodule.subset_span
+    exact ⟨b.1 + s, by dsimp [s]; omega, ⟨x b, rfl⟩⟩
+  let lifted : Fin (t + 1) → W := fun i =>
+    ⟨reverseFlatWindowFamily (K := K) q k (t + 1) i, hfam_mem i⟩
+  have hlifted : LinearIndependent K lifted := by
+    apply LinearIndependent.of_comp W.subtype
+    simpa [lifted, Function.comp_def] using hfam_li
+  have hcard := hlifted.fintype_card_le_finrank
+  simp only [Fintype.card_fin] at hcard
+  dsimp [W] at hcard
+  omega
+
 end BarrierVerification
