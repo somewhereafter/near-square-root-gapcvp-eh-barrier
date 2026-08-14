@@ -39,7 +39,7 @@ private theorem mapTwoPowEntry
       calc
         lambda (x ^ (2 ^ (q + 1))) row col =
             lambda ((x ^ (2 ^ q)) ^ 2) row col := by
-              congr 2
+              congr 1
               simp [pow_succ, pow_mul]
         _ = lambda (x ^ (2 ^ q)) row col ^ 2 := mapSq _ row col
         _ = (lambda x row col ^ (2 ^ q)) ^ 2 := by rw [ih]
@@ -174,10 +174,13 @@ theorem matrixCommonAtomOfRealization
     fun i => lambda (primitiveIdempotent (indexEquiv i))
   have hcoeff_ne_zero (i : Fin count) : coefficients i ≠ 0 := by
     intro hzero
+    have hzero' :
+        lambda (primitiveIdempotent (indexEquiv i)) = 0 := by
+      simpa [coefficients] using hzero
     apply hprimitive_ne_zero (indexEquiv i)
     apply jointNondegenerate
     intro b
-    rw [hmul_primitive, map_smul, hzero, smul_zero]
+    rw [hmul_primitive, map_smul, hzero', smul_zero]
   have hcoeff_binary (i : Fin count) (row : Fin m) (col : Fin n) :
       coefficients i row col = 0 ∨ coefficients i row col = 1 := by
     have hfix : coefficients i row col = coefficients i row col ^ 2 := by
