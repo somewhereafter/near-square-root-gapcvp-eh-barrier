@@ -1,25 +1,29 @@
 # Lean verification boundary
 
-This directory begins the machine-checking work requested by Version 2 of the
-paper. It intentionally distinguishes what is verified from what remains the
-central conditional assumption.
+This directory targets the new matrix-valued rectangular common-atom lemma in
+Theorem 7.1 of Version 2. Mira's already-formalized scalar theorem is a
+dependency, not the verification target.
 
-## Verified here
+## Current proof boundary
 
-- `ParameterLedger.lean` checks the exact rational identity in Equation (9.10)
-  and the algebraic rearrangement used in Corollary 5.3.
-- `ScalarCommonAtom.lean` proves the `1 x 1` scalar specialization of the
-  rectangular common-atom statement from Mira's already-formalized scalar
-  Frobenius-Hankel theorem.
+- `RectangularCommonAtom.lean` attempts the genuinely matrix-valued spectral
+  half: from a finite monogenic realization with a jointly nondegenerate
+  matrix-valued functional satisfying the entrywise Frobenius law, it produces
+  one common atom set and nonzero coefficient matrices with entries in
+  `{0,1}`.
+- It also attempts to derive reducedness of the realization algebra from the
+  matrix-valued Frobenius law and joint nondegeneracy.
 
 ## Not yet verified
 
-The matrix-valued rectangular common-atom lemma in Theorem 7.1 is not proved
-here. In particular, the protected finite-window realization step that must
-produce one common atom set for every matrix entry remains the critical gap.
-The complexity-class implications in Part I also depend on cited published
-theorems and are audited at the citation level rather than re-proved inside
-Lean.
+These claims count as verified only after the remote Lean build is green. The
+protected finite-window realization implication is still the critical
+remaining half: the finite rectangular block-Hankel rank hypothesis and guard
+columns must construct the jointly reachable/observable monogenic realization
+used by the verified spectral theorem. Completing that bridge completes the
+new lemma. The complexity-class implications in Part I depend on cited
+published theorems and are audited at the citation level rather than re-proved
+inside Lean.
 
 ## Build
 

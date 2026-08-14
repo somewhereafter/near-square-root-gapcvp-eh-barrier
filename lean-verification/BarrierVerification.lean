@@ -1,6 +1,3 @@
-import BarrierVerification.ParameterLedger
-import BarrierVerification.ScalarCommonAtom
+import BarrierVerification.RectangularCommonAtom
 
-#print axioms BarrierVerification.protocolDeficitIdentity
-#print axioms BarrierVerification.amethCeilingRearrangement
-#print axioms BarrierVerification.scalarCommonAtomOfRankLtSucc
+#print axioms BarrierVerification.matrixCommonAtomOfRealization
