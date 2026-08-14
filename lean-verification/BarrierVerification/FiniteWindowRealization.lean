@@ -564,6 +564,11 @@ theorem exists_plateau_state_shift
   obtain ⟨h, hC, hLt, hplateau⟩ :=
     exists_blockColumnSpan_plateau
       (K := K) (momentBlockColumn moment k) C t hnonzero hrankCt
+  let phi := blockSynthesis (K := K) (momentBlockColumn moment k) h
+  let psi := shiftedBlockSynthesis (K := K) (momentBlockColumn moment k) h
+  let hker : LinearMap.ker phi ≤ LinearMap.ker psi :=
+    ker_blockSynthesis_le_ker_shifted moment k h t L htk (by omega) hrank
+  let A := blockShiftOnPlateau (momentBlockColumn moment k) h hker hplateau
   refine ⟨h, hC, hLt, hplateau, ?_, ?_⟩
   · rw [range_blockSynthesis (K := K)]
     exact (Submodule.finrank_mono
