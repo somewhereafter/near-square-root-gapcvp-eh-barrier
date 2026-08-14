@@ -45,7 +45,10 @@ theorem relationMoment_window_eq
     (fun ai : Fin k × Fin m => relationMoment moment x (s + ai.1.1) ai.2) =
       ∑ b, momentBlockColumn moment k (b.1 + s) (x b) := by
   funext ai
-  simp [relationMoment, Finset.sum_apply, add_comm]
+  simp only [relationMoment, Finset.sum_apply, momentBlockColumn_apply]
+  apply Finset.sum_congr rfl
+  intro b _hb
+  rw [show b.1 + (s + ai.1.1) = ai.1.1 + (b.1 + s) by omega]
 
 /-- Vectors obtainable from one displayed block column up to index `h`. -/
 def blockColumnSet
@@ -109,7 +112,34 @@ theorem range_blockSynthesis
     let ib : Fin (h + 1) := ⟨b, by omega⟩
     refine ⟨Pi.single ib x, ?_⟩
     rw [blockSynthesis_apply (K := K)]
+    rw [Fintype.sum_eq_single ib]
     simp [ib]
+
+/-- Flattening the coefficient blocks turns block synthesis into ordinary
+matrix-vector multiplication by the rectangular block-Hankel matrix. -/
+theorem blockSynthesis_comp_curry_eq_mulVecLin
+    {K : Type*} [Field K] {m : ℕ}
+    (moment : ℕ → Matrix (Fin m) (Fin m) K) (k h : ℕ) :
+    (blockSynthesis (K := K) (momentBlockColumn moment k) h).comp
+        (LinearEquiv.curry K K (Fin (h + 1)) (Fin m)).toLinearMap =
+      (rectangularBlockHankel moment k h).mulVecLin := by
+  apply LinearMap.ext
+  intro x
+  funext ai
+  simp [blockSynthesis_apply, rectangularBlockHankel, Matrix.mulVec,
+    Fintype.sum_prod_type, add_comm]
+
+/-- The abstract column-span dimension is exactly the matrix rank appearing
+in the paper statement. -/
+theorem rectangularBlockHankel_rank_eq_finrank_span
+    {K : Type*} [Field K] {m : ℕ}
+    (moment : ℕ → Matrix (Fin m) (Fin m) K) (k h : ℕ) :
+    (rectangularBlockHankel moment k h).rank =
+      Module.finrank K
+        (blockColumnSpan (K := K) (momentBlockColumn moment k) h) := by
+  rw [Matrix.rank, ← blockSynthesis_comp_curry_eq_mulVecLin]
+  rw [LinearMap.range_comp_of_range_eq_top _ (LinearEquiv.range _)]
+  rw [range_blockSynthesis (K := K)]
 
 /-- A nonzero monotone column-span chain of dimension at most `t` must
 plateau within the next `t` inclusions. -/
@@ -243,15 +273,11 @@ theorem reverseFlatWindowFamily_linearIndependent
     (hqk : q k ≠ 0)
     (hnk : n ≤ k) :
     LinearIndependent K (reverseFlatWindowFamily (K := K) q k n) := by
-  let uncurryEquiv : (Fin k → Fin m → K) ≃ₗ[K]
-      (Fin k × Fin m → K) :=
-    (LinearEquiv.curry K K (Fin k) (Fin m)).symm
-  have hli := (reverseWindowFamily_linearIndependent
-      (K := K) q k n hqzero hqk hnk).map'
-    uncurryEquiv.toLinearMap (by simp)
-  convert hli using 1
-  funext i ai
-  rfl
+  apply LinearIndependent.of_comp
+    (LinearEquiv.curry K K (Fin k) (Fin m)).toLinearMap
+  simpa [reverseFlatWindowFamily, reverseWindowFamily, Function.comp_def] using
+    (reverseWindowFamily_linearIndependent
+      (K := K) q k n hqzero hqk hnk)
 
 /-- Any relation among the first `h + 1` block columns remains a relation
 after shifting every column once, provided the protected right tail contains
