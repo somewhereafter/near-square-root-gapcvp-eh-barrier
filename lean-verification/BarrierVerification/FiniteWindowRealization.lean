@@ -45,10 +45,11 @@ theorem relationMoment_window_eq
     (fun ai : Fin k × Fin m => relationMoment moment x (s + ai.1.1) ai.2) =
       ∑ b, momentBlockColumn moment k (b.1 + s) (x b) := by
   funext ai
+  rcases ai with ⟨a, i⟩
   simp only [relationMoment, Finset.sum_apply, momentBlockColumn_apply]
   apply Finset.sum_congr rfl
   intro b _hb
-  rw [show b.1 + (s + ai.1.1) = ai.1.1 + (b.1 + s) by omega]
+  rw [show b.1 + (s + a.1) = a.1 + (b.1 + s) by omega]
 
 /-- Vectors obtainable from one displayed block column up to index `h`. -/
 def blockColumnSet
@@ -112,8 +113,7 @@ theorem range_blockSynthesis
     let ib : Fin (h + 1) := ⟨b, by omega⟩
     refine ⟨Pi.single ib x, ?_⟩
     rw [blockSynthesis_apply (K := K)]
-    rw [Fintype.sum_eq_single ib]
-    simp [ib]
+    rw [Fintype.sum_eq_single ib] <;> simp [ib]
 
 /-- Flattening the coefficient blocks turns block synthesis into ordinary
 matrix-vector multiplication by the rectangular block-Hankel matrix. -/
@@ -127,7 +127,7 @@ theorem blockSynthesis_comp_curry_eq_mulVecLin
   intro x
   funext ai
   simp [blockSynthesis_apply, rectangularBlockHankel, Matrix.mulVec,
-    Fintype.sum_prod_type, add_comm]
+    dotProduct, Fintype.sum_prod_type]
 
 /-- The abstract column-span dimension is exactly the matrix rank appearing
 in the paper statement. -/
@@ -273,9 +273,14 @@ theorem reverseFlatWindowFamily_linearIndependent
     (hqk : q k ≠ 0)
     (hnk : n ≤ k) :
     LinearIndependent K (reverseFlatWindowFamily (K := K) q k n) := by
+  have hfamily :
+      (fun i => Function.curry (reverseFlatWindowFamily (K := K) q k n i)) =
+        reverseWindowFamily (K := K) q k n := by
+    rfl
   apply LinearIndependent.of_comp
     (LinearEquiv.curry K K (Fin k) (Fin m)).toLinearMap
-  simpa [reverseFlatWindowFamily, reverseWindowFamily, Function.comp_def] using
+  rw [hfamily]
+  exact
     (reverseWindowFamily_linearIndependent
       (K := K) q k n hqzero hqk hnk)
 
@@ -421,7 +426,10 @@ theorem inducedShiftOnRange_apply
     inducedShiftOnRange phi psi hker hrange
         ⟨phi x, ⟨x, rfl⟩⟩ =
       ⟨psi x, hrange ⟨x, rfl⟩⟩ := by
-  simp [inducedShiftOnRange, LinearMap.quotKerEquivRange_symm_apply_image]
+  simp only [inducedShiftOnRange,
+    LinearMap.quotKerEquivRange_symm_apply_image, LinearMap.comp_apply,
+    Submodule.liftQ_apply]
+  rfl
 
 /-- At a plateau, shifting the displayed block columns introduces no new
 state direction. -/

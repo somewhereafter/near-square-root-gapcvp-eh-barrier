@@ -11,6 +11,10 @@ on:
       - ".github/workflows/lean.yml"
   workflow_dispatch:
 
+concurrency:
+  group: lean-verification-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
