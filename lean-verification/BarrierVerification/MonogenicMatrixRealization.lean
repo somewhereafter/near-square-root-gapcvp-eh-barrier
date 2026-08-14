@@ -21,8 +21,10 @@ theorem generatedShift_adjoin_eq_top
     Algebra.adjoin K {generatedShift shift} = ⊤ := by
   apply top_unique
   rintro ⟨x, hx⟩ _
-  rw [Algebra.adjoin_singleton_eq_range_aeval] at hx
-  obtain ⟨p, hp⟩ := hx
+  have hx' : x ∈ (Polynomial.aeval shift).range := by
+    rw [← Algebra.adjoin_singleton_eq_range_aeval]
+    exact hx
+  obtain ⟨p, hp⟩ := hx'
   rw [Algebra.adjoin_singleton_eq_range_aeval]
   refine ⟨p, ?_⟩
   apply Subtype.ext
@@ -113,9 +115,9 @@ theorem generatedFunctional_mapSq
   intro x row col
   have hrepr := pb.basis.sum_repr x
   rw [← hrepr]
-  rw [Finset.sum_pow_char]
+  rw [sum_pow_char]
   simp only [map_sum, Finset.sum_apply]
-  rw [Finset.sum_pow_char]
+  rw [sum_pow_char]
   apply Finset.sum_congr rfl
   intro i _hi
   have hit : (i : ℕ) < t := by
@@ -189,14 +191,14 @@ theorem matrixCommonAtomOfGeneratedFunctional
       lambdaQ (x ^ 2) row col = lambdaQ x row col ^ 2 :=
     matrixQuotientFunctional_mapSq lambda hmapSq
   have hsurj : Function.Surjective (Ideal.Quotient.mkₐ K J) :=
-    Ideal.Quotient.mkₐ_surjective J
+    Ideal.Quotient.mkₐ_surjective (R₁ := K) J
   have hgeneratesQ : Algebra.adjoin K {generatorQ} = ⊤ := by
     have hmap := congrArg
       (fun S : Subalgebra K A0 => S.map (Ideal.Quotient.mkₐ K J)) hgenerated
-    simpa [generatorQ, Algebra.map_adjoin_singleton,
+    simpa [generatorQ, AlgHom.map_adjoin_singleton,
       (AlgHom.range_eq_top (Ideal.Quotient.mkₐ K J)).2 hsurj] using hmap
   have hfinrankQ : Module.finrank K AQ ≤ t := by
-    exact (Submodule.finrank_quotient_le J.toSubmodule).trans hfinrank
+    exact (Submodule.finrank_quotient_le J).trans hfinrank
   have hmomentQ : ∀ e, e ≤ Q → lambdaQ (generatorQ ^ e) = moment e := by
     intro e he
     change matrixQuotientFunctional lambda

@@ -1,8 +1,10 @@
 import BarrierVerification.FiniteWindowRealization
 import BarrierVerification.MonogenicMatrixRealization
+import BarrierVerification.RectangularCommonAtomFromWindow
 
 #print axioms BarrierVerification.matrixCommonAtomOfRealization
 #print axioms BarrierVerification.reverseWindowFamily_linearIndependent
 #print axioms BarrierVerification.matrixQuotientFunctional_jointNondegenerate
 #print axioms BarrierVerification.generatedFunctional_mapSq
 #print axioms BarrierVerification.matrixCommonAtomOfGeneratedFunctional
+#print axioms BarrierVerification.rectangularCommonAtom_from_window

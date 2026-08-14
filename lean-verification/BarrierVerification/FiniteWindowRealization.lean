@@ -544,7 +544,7 @@ theorem exists_plateau_state_shift
       let A := blockShiftOnPlateau (momentBlockColumn moment k) h hker hplateau
       Module.finrank K (LinearMap.range phi) ≤ t ∧
       ∀ e, e ≤ C → ∀ x : Fin m → K,
-        A ^ e
+        (A ^ e)
             ⟨momentBlockColumn moment k 0 x,
               by
                 rw [range_blockSynthesis (K := K)]
@@ -596,5 +596,26 @@ theorem exists_plateau_state_shift
         rw [blockShiftOnPlateau_apply]
         apply Subtype.ext
         exact hpsi
+
+/-- If the displayed block-column span is zero, every moment whose column is
+displayed is the zero matrix. -/
+theorem moment_eq_zero_of_blockColumnSpan_eq_bot
+    {K : Type*} [Field K] {m : ℕ}
+    (moment : ℕ → Matrix (Fin m) (Fin m) K)
+    (k h e : ℕ) (hk : 0 < k) (he : e ≤ h)
+    (hbot : blockColumnSpan (K := K) (momentBlockColumn moment k) h = ⊥) :
+    moment e = 0 := by
+  classical
+  ext i j
+  let x : Fin m → K := Pi.single j 1
+  have hmem : momentBlockColumn moment k e x ∈
+      blockColumnSpan (K := K) (momentBlockColumn moment k) h := by
+    apply Submodule.subset_span
+    exact ⟨e, he, ⟨x, rfl⟩⟩
+  rw [hbot] at hmem
+  have hzero : momentBlockColumn moment k e x = 0 := by
+    simpa using hmem
+  have hentry := congrFun hzero (⟨⟨0, hk⟩, i⟩)
+  simpa [x, Matrix.mulVec_single_one] using hentry
 
 end BarrierVerification
