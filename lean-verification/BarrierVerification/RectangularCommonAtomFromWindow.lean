@@ -91,6 +91,9 @@ theorem rectangularCommonAtom_from_window
       have hinput : input (Pi.single j (1 : K)) =
           ⟨momentBlockColumn moment k 0 (Pi.single j (1 : K)),
             by
+              change momentBlockColumn moment k 0 (Pi.single j (1 : K)) ∈
+                LinearMap.range
+                  (blockSynthesis (K := K) (momentBlockColumn moment k) h)
               rw [range_blockSynthesis (K := K)]
               apply Submodule.subset_span
               exact ⟨0, by omega, ⟨Pi.single j (1 : K), rfl⟩⟩⟩ := by
