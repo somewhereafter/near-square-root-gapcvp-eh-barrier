@@ -39,7 +39,6 @@ private theorem mapTwoPowEntry
       calc
         lambda (x ^ (2 ^ (q + 1))) row col =
             lambda ((x ^ (2 ^ q)) ^ 2) row col := by
-              congr 1
               simp [pow_succ, pow_mul]
         _ = lambda (x ^ (2 ^ q)) row col ^ 2 := mapSq _ row col
         _ = (lambda x row col ^ (2 ^ q)) ^ 2 := by rw [ih]
@@ -144,7 +143,8 @@ theorem matrixCommonAtomOfRealization
     have htest := AlgHom.congr_fun hcoordinate
       (split.symm (Pi.single (indexEquiv i) 1))
     have : (1 : K) = 0 := by
-      simpa [coordinate, hindex_ne] using htest
+      simp [coordinate, hindex_ne] at htest
+      exact htest
     exact one_ne_zero this
   let primitiveIdempotent (i : I) : A :=
     split.symm (Pi.single i 1)
@@ -160,7 +160,7 @@ theorem matrixCommonAtomOfRealization
     intro hzero
     have h := congrArg split hzero
     have hi := congrFun h i
-    simpa [primitiveIdempotent] using hi
+    simp [primitiveIdempotent] at hi
   have hmul_primitive (i : I) (b : A) :
       primitiveIdempotent i * b =
         (split b i) • primitiveIdempotent i := by

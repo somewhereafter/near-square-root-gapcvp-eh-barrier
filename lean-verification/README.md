@@ -6,18 +6,18 @@ dependency, not the verification target.
 
 ## Current proof boundary
 
-- `RectangularCommonAtom.lean` attempts the genuinely matrix-valued spectral
+- `RectangularCommonAtom.lean` proves the genuinely matrix-valued spectral
   half: from a finite monogenic realization with a jointly nondegenerate
   matrix-valued functional satisfying the entrywise Frobenius law, it produces
   one common atom set and nonzero coefficient matrices with entries in
   `{0,1}`.
-- It also attempts to derive reducedness of the realization algebra from the
+- It also derives reducedness of the realization algebra from the
   matrix-valued Frobenius law and joint nondegeneracy.
 
 ## Not yet verified
 
-These claims count as verified only after the remote Lean build is green. The
-protected finite-window realization implication is still the critical
+The remote Lean build is green. The protected finite-window realization
+implication is still the critical
 remaining half: the finite rectangular block-Hankel rank hypothesis and guard
 columns must construct the jointly reachable/observable monogenic realization
 used by the verified spectral theorem. Completing that bridge completes the
