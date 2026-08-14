@@ -16,7 +16,8 @@ def momentBlockColumn
     {K : Type*} [Field K] {m : ℕ}
     (moment : ℕ → Matrix (Fin m) (Fin m) K) (k b : ℕ) :
     (Fin m → K) →ₗ[K] (Fin k × Fin m → K) :=
-  LinearMap.pi fun ai => (moment (ai.1.1 + b)).mulVecLin
+  LinearMap.pi fun ai =>
+    (LinearMap.proj ai.2).comp (moment (ai.1.1 + b)).mulVecLin
 
 @[simp]
 theorem momentBlockColumn_apply
@@ -24,7 +25,7 @@ theorem momentBlockColumn_apply
     (moment : ℕ → Matrix (Fin m) (Fin m) K)
     (k b : ℕ) (x : Fin m → K) (a : Fin k) (i : Fin m) :
     momentBlockColumn moment k b x (a, i) =
-      (moment (a.1 + b) *ᵥ x) i :=
+      (moment (a.1 + b)).mulVec x i :=
   rfl
 
 /-- Moment-vector sequence produced by a finite linear relation among block
@@ -33,7 +34,7 @@ def relationMoment
     {K : Type*} [Field K] {m h : ℕ}
     (moment : ℕ → Matrix (Fin m) (Fin m) K)
     (x : Fin (h + 1) → (Fin m → K)) (j : ℕ) : Fin m → K :=
-  ∑ b, moment (b.1 + j) *ᵥ x b
+  ∑ b : Fin (h + 1), (moment (b.1 + j)).mulVec (x b)
 
 /-- A shifted window of `relationMoment` is the corresponding sum of shifted
 block columns. -/
@@ -44,8 +45,7 @@ theorem relationMoment_window_eq
     (fun ai : Fin k × Fin m => relationMoment moment x (s + ai.1.1) ai.2) =
       ∑ b, momentBlockColumn moment k (b.1 + s) (x b) := by
   funext ai
-  simp [relationMoment, Matrix.mulVec, Finset.sum_apply,
-    add_assoc, add_comm, add_left_comm]
+  simp [relationMoment, Finset.sum_apply, add_comm]
 
 /-- Vectors obtainable from one displayed block column up to index `h`. -/
 def blockColumnSet
@@ -70,6 +70,46 @@ theorem blockColumnSpan_mono
   intro y hy
   obtain ⟨b, hb, hy⟩ := hy
   exact ⟨b, hb.trans hh', hy⟩
+
+/-- Synthesis of an arbitrary linear combination of the first `h + 1`
+block columns. -/
+def blockSynthesis
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h : ℕ) :
+    (Fin (h + 1) → X) →ₗ[K] Y :=
+  ∑ b : Fin (h + 1), (G b.1).comp (LinearMap.proj b)
+
+@[simp]
+theorem blockSynthesis_apply
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h : ℕ) (x : Fin (h + 1) → X) :
+    blockSynthesis (K := K) G h x = ∑ b, G b.1 (x b) := by
+  simp [blockSynthesis]
+
+/-- The explicit synthesis map has exactly the abstract block-column span as
+its range. -/
+theorem range_blockSynthesis
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (G : ℕ → X →ₗ[K] Y) (h : ℕ) :
+    LinearMap.range (blockSynthesis (K := K) G h) =
+      blockColumnSpan (K := K) G h := by
+  apply le_antisymm
+  · rintro y ⟨x, rfl⟩
+    rw [blockSynthesis_apply (K := K)]
+    apply Submodule.sum_mem
+    intro b _hb
+    apply Submodule.subset_span
+    exact ⟨b.1, by omega, ⟨x b, rfl⟩⟩
+  · apply Submodule.span_le.2
+    intro y hy
+    obtain ⟨b, hb, x, rfl⟩ := hy
+    let ib : Fin (h + 1) := ⟨b, by omega⟩
+    refine ⟨Pi.single ib x, ?_⟩
+    rw [blockSynthesis_apply (K := K)]
+    simp [ib]
 
 /-- A nonzero monotone column-span chain of dimension at most `t` must
 plateau within the next `t` inclusions. -/
@@ -209,8 +249,9 @@ theorem reverseFlatWindowFamily_linearIndependent
   have hli := (reverseWindowFamily_linearIndependent
       (K := K) q k n hqzero hqk hnk).map'
     uncurryEquiv.toLinearMap (by simp)
-  simpa [reverseFlatWindowFamily, reverseWindowFamily, uncurryEquiv,
-    Function.comp_def] using hli
+  convert hli using 1
+  funext i ai
+  rfl
 
 /-- Any relation among the first `h + 1` block columns remains a relation
 after shifting every column once, provided the protected right tail contains
