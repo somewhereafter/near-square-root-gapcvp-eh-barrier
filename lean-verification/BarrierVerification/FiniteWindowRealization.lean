@@ -543,7 +543,7 @@ theorem exists_plateau_state_shift
         ker_blockSynthesis_le_ker_shifted moment k h t L htk (by omega) hrank
       let A := blockShiftOnPlateau (momentBlockColumn moment k) h hker hplateau
       Module.finrank K (LinearMap.range phi) ≤ t ∧
-      ∀ e, e ≤ C → ∀ x : Fin m → K,
+      ∀ e, (he : e ≤ C) → ∀ x : Fin m → K,
         (A ^ e)
             ⟨momentBlockColumn moment k 0 x,
               by
@@ -577,7 +577,7 @@ theorem exists_plateau_state_shift
         have heh : e ≤ h := by omega
         have hesh : e + 1 ≤ h := by omega
         rw [pow_succ']
-        rw [LinearMap.mul_apply]
+        change A ((A ^ e) _) = _
         rw [ih (by omega)]
         let coeff := singleBlockCoeff h e heh x
         have hphi : blockSynthesis (K := K) (momentBlockColumn moment k) h coeff =

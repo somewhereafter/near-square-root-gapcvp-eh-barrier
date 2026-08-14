@@ -21,7 +21,7 @@ theorem generatedShift_adjoin_eq_top
     Algebra.adjoin K {generatedShift shift} = ⊤ := by
   apply top_unique
   rintro ⟨x, hx⟩ _
-  have hx' : x ∈ (Polynomial.aeval shift).range := by
+  have hx' : x ∈ (Polynomial.aeval (R := K) shift).range := by
     rw [← Algebra.adjoin_singleton_eq_range_aeval]
     exact hx
   obtain ⟨p, hp⟩ := hx'
@@ -83,7 +83,7 @@ def stateMatrixFunctional
 matrix functional square-compatible on the whole generated algebra. -/
 theorem generatedFunctional_mapSq
     {K W : Type*} [Field K] [CharP K 2]
-    [AddCommGroup W] [Module K W] [FiniteDimensional K W]
+    [AddCommGroup W] [Module K W] [FiniteDimensional K W] [Nontrivial W]
     {m C k t : ℕ}
     (shift : Module.End K W)
     (moment : ℕ → Matrix (Fin m) (Fin m) K)
@@ -102,6 +102,7 @@ theorem generatedFunctional_mapSq
     subst a
     subst b
     rfl)
+  letI : ExpChar A0 2 := ExpChar.of_injective_algebraMap' K 2
   letI : FiniteDimensional K A0 :=
     FiniteDimensional.of_injective
       (Algebra.adjoin K {shift}).val.toLinearMap Subtype.val_injective
@@ -143,7 +144,7 @@ theorem generatedFunctional_mapSq
 preserves generation and cannot increase dimension. -/
 theorem matrixCommonAtomOfGeneratedFunctional
     {K W : Type*} [Field K] [IsAlgClosed K] [CharP K 2]
-    [AddCommGroup W] [Module K W] [FiniteDimensional K W]
+    [AddCommGroup W] [Module K W] [FiniteDimensional K W] [Nontrivial W]
     {m C Q k t : ℕ}
     (shift : Module.End K W)
     (moment : ℕ → Matrix (Fin m) (Fin m) K)
@@ -198,7 +199,8 @@ theorem matrixCommonAtomOfGeneratedFunctional
     simpa [generatorQ, AlgHom.map_adjoin_singleton,
       (AlgHom.range_eq_top (Ideal.Quotient.mkₐ K J)).2 hsurj] using hmap
   have hfinrankQ : Module.finrank K AQ ≤ t := by
-    exact (Submodule.finrank_quotient_le J).trans hfinrank
+    exact (LinearMap.finrank_le_finrank_of_surjective
+      (Ideal.Quotient.mkₐ K J).toLinearMap hsurj).trans hfinrank
   have hmomentQ : ∀ e, e ≤ Q → lambdaQ (generatorQ ^ e) = moment e := by
     intro e he
     change matrixQuotientFunctional lambda

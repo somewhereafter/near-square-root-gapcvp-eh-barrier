@@ -55,6 +55,18 @@ theorem rectangularCommonAtom_from_window
     let hker : LinearMap.ker phi ≤ LinearMap.ker psi :=
       ker_blockSynthesis_le_ker_shifted moment k h t L htk (by omega) hrankSpan
     let W := LinearMap.range phi
+    haveI : Nontrivial W := by
+      apply Submodule.nontrivial_iff_ne_bot.mpr
+      dsimp [W, phi]
+      rw [range_blockSynthesis (K := K)]
+      intro hbot
+      apply hzero
+      apply le_antisymm
+      · have hmono := blockColumnSpan_mono (K := K)
+          (momentBlockColumn moment k) hC
+        rw [hbot] at hmono
+        exact hmono
+      · exact bot_le
     let shift : Module.End K W :=
       blockShiftOnPlateau (momentBlockColumn moment k) h hker hplateau
     let input : (Fin m → K) →ₗ[K] W :=
