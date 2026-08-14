@@ -1,6 +1,6 @@
 # Authorship and provenance
 
-**Work:** *An Exponential-Hierarchy Barrier for Near-Square-Root GapCVP Hardness*
+**Work:** *Near-Square-Root NP-Hardness for Euclidean CVP Would Collapse the Exponential Hierarchy*
 
 **Author:** somewhereafter
 

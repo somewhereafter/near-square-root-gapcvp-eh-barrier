@@ -29,6 +29,14 @@ pdflatex --disable-installer -interaction=nonstopmode -halt-on-error main.tex
 The theorem is conditional and architecture-independent. It does not claim an
 unconditional impossibility result or a construction in the surviving strip.
 
+The updated paper also proves a constant-sensitive sharpening of the
+Aharonov--Regev verifier:
+`GapCVP_((2/pi+epsilon)sqrt(D))` lies in `NP intersect coNP` for every fixed
+positive `epsilon`. Consequently, deterministic Karp hardness at the exact
+unit factor `sqrt(D)` would imply `NP = coNP`. This sharpening is proved in
+the paper; it is not attributed to the literal statement of the original
+Aharonov--Regev theorem, which only specifies an absolute constant.
+
 ## Authorship and provenance
 
 The author is **somewhereafter**. The repository includes:
