@@ -39,17 +39,18 @@ Would Collapse the Exponential Hierarchy}
 Aggarwal, Bennett, Brakerski, Golovnev, Kumar, Li, Peters,
 Stephens-Davidowitz, and Vaikuntanathan proved a quantitative public-coin
 protocol placing rank-$D$ Euclidean $\GapCVP_\gamma$ in $\coAM$ with
-complexity $2^{O(D/\gamma^2)}$ up to polynomial factors.  We record a
-consequence at the near-square-root approximation frontier.  If, for any
-fixed $C>0$, Euclidean
+complexity $2^{O(D/\gamma^2)}$ up to polynomial factors.  Combining this
+tradeoff with a resource-scaled collapse theorem of Pavan and Vinodchandran
+gives the following consequence.  If, for any fixed $C>0$, Euclidean
 \[
   \GapCVP_{\sqrt D/\log^C D}
 \]
 is NP-hard under polynomial-time promise-preserving many-one reductions,
-then the exponential hierarchy collapses to its second level.  The proof
-combines the quantitative lattice protocol with the resource-scaled
-Boppana--H\aa stad--Zachos theorem of Pavan, Selman, Sengupta, and
-Vinodchandran.
+then the exponential hierarchy collapses to its second level.  For
+$C<1/2$, a stronger polynomial-hierarchy barrier already follows from the
+classical Goldreich--Goldwasser protocol; at $C=1/2$, the quantitative
+protocol above is itself polynomial.  The additional asymptotic range
+isolated here is $C>1/2$, where that protocol becomes quasipolynomial.
 
 More generally, for a reduction from inputs of length $n$ producing rank
 $D(n)$ and approximation $\gamma(D(n))$, the same conclusion follows whenever
@@ -68,8 +69,9 @@ $\GapCVP_{(2/\pi+\varepsilon)\sqrt D}$ lies in
 $\mathsf{NP}\cap\mathsf{coNP}$.  In particular,
 $\GapCVP_{\sqrt D}$ is in $\mathsf{NP}\cap\mathsf{coNP}$, so deterministic
 Karp NP-hardness at the exact unit square-root factor would imply
-$\mathsf{NP}=\mathsf{coNP}$.  This constant sharpening is proved here; it is
-not attributed to the literal published statement of Aharonov--Regev.
+$\mathsf{NP}=\mathsf{coNP}$.  The unit-factor consequence is standard in the
+later literature; the new claim here is the explicit $2/\pi+\varepsilon$
+constant obtained from the same verifier.
 \end{abstract}
 
 \section{Introduction}
@@ -84,7 +86,10 @@ Its promise version $\GapCVP_\gamma$ distinguishes
 \]
 The square-root scale is a persistent boundary in the complexity of lattice
 problems, beginning with the classical coAM barrier of Goldreich and
-Goldwasser~\cite{GG00}.  A particularly sharp prospective hardness factor is
+Goldwasser~\cite{GG00}.  Their polynomial-time protocol covers
+$\Theta(\sqrt{D/\log D})$ and, by promise monotonicity, (1) for
+$C<1/2$; the boundary $C=1/2$ depends on the fixed approximation constant.
+A particularly sharp prospective hardness factor is
 \[
   \gamma_C(D)=\frac{\sqrt D}{\log^C D},                 \tag{1}
 \]
@@ -93,23 +98,23 @@ larger than $D^c$ for every fixed $c<1/2$.
 It should be compared with Mira's formalized NP-hardness theorem at $D^c$ for
 every fixed $c<1/2$~\cite{Mira26}.
 
-Our main observation is that (1) is already inside a universal
-quasipolynomial-time $\coAM$ regime.  This fact has a stronger consequence
-than a construction-specific obstruction: polynomial-time NP-hardness at
-(1) would collapse the exponential hierarchy.  No classification of lattice
-gadgets, codes, Fourier witnesses, or source compilers is needed.
+Our observation is that the full family (1), including the additional range
+$C>1/2$ addressed here, lies inside a universal quasipolynomial-time $\coAM$
+regime.  Polynomial-time NP-hardness there would collapse the exponential
+hierarchy.  No classification of lattice gadgets, codes, Fourier witnesses,
+or source compilers is needed.
 
-The ingredients are published.  Aggarwal et al.~\cite{ABBGKLPV26} prove the
+The ingredients are published.  Aggarwal et al.~\cite{ABBGKLPV22} prove the
 time--approximation tradeoff
 \[
   \GapCVP_\gamma\in\coAM\text{-TIME}
   \left(2^{O(D/\gamma^2)}\poly(M)\right),               \tag{2}
 \]
-where $M$ is the target-instance encoding length.  Pavan et
-al.~\cite{PSSV07} prove a resource-scaled extension of the
+where $M$ is the target-instance encoding length.  Pavan and
+Vinodchandran~\cite{PV04} prove a resource-scaled extension of the
 Boppana--H\aa stad--Zachos collapse theorem~\cite{BHZ87}: quasipolynomial
 Arthur--Merlin protocols for coNP collapse the exponential hierarchy to its
-second level.  Substituting (1) into (2) gives complexity
+second level; see also~\cite{PSSV07}.  Substituting (1) into (2) gives complexity
 $2^{O(\log^{2C}D)}\poly(M)$, which is quasipolynomial under any polynomial-time
 reduction.
 
@@ -119,23 +124,32 @@ while their displayed proof explicitly yields the safe factor $100\sqrt D$.
 Section~\ref{sec:constant} retains the constants in the same verifier and
 proves membership for every $(2/\pi+\varepsilon)\sqrt D$.  Since $2/\pi<1$,
 exact $\sqrt D$-hardness would imply $\mathsf{NP}=\mathsf{coNP}$.  This
-confirms the endpoint consequence stated in Mira's draft~\cite{Mira26}, while
-making the published-versus-new proof boundary explicit.
+endpoint consequence is already stated in subsequent literature, including
+the introduction of~\cite{ABBGKLPV22}, and in Mira's draft~\cite{Mira26}.
+The contribution here is the improved explicit constant.
 
 The contribution of this note is fourfold.
 \begin{enumerate}
-  \item We state and prove the resulting architecture-independent conditional
-  impossibility theorem for near-square-root $\GapCVP$ hardness.
+  \item We extend the explicit hardness-barrier ledger beyond the known
+  polynomial-time range $C<1/2$.  Combining the quantitative protocol with
+  the quasipolynomial-resource collapse theorem covers every fixed $C>1/2$.
   \item We give the source-sensitive form
   $D(n)/\gamma(D(n))^2=\log^{O(1)}n$, avoiding an implicit assumption that
   target rank and source length are polynomially equivalent.
   \item We isolate the first asymptotic strip not covered by the
   quasipolynomial-protocol argument and separate it from the stronger AMETH
-  barrier already implicit in~\cite{ABBGKLPV26}.
-  \item We prove the constant-sensitive Aharonov--Regev sharpening and its
-  $\mathsf{NP}=\mathsf{coNP}$ consequence at the exact unit square-root
-  factor.
+  barrier already implicit in~\cite{ABBGKLPV22}.
+  \item We prove the explicit $2/\pi+\varepsilon$ Aharonov--Regev sharpening;
+  the resulting unit-factor collapse consequence itself is not claimed as
+  new.
 \end{enumerate}
+
+The three relevant rungs are therefore: the Aharonov--Regev coNP barrier at
+the square-root scale; the polynomial-time coAM barrier through $C\le1/2$
+(classical Goldreich--Goldwasser for $C<1/2$, and (2) at the boundary); and
+the quasipolynomial coAM/EH barrier proved here for $C>1/2$.  This separation
+is about the strength of the available protocol and collapse consequence,
+not three different lattice problems.
 
 The theorem is conditional.  It does not show unconditionally that the
 reduction cannot exist.  Rather, a correct reduction would itself establish
@@ -179,8 +193,7 @@ The exponential hierarchy is
 \]
 We use the following published collapse theorem.
 
-\begin{theorem}[Pavan--Selman--Sengupta--Vinodchandran
-\cite{PSSV07}]                                                    \label{thm:pssv}
+\begin{theorem}[Pavan--Vinodchandran]                              \label{thm:pssv}
 If $\mathsf{coNP}\subseteq\AM_{\qpoly}$, then
 \[
   \PH_{\qpoly}\subseteq\AM_{\qpoly}
@@ -198,10 +211,11 @@ $\Sigma_2^{\EXP}\subseteq\EH$, therefore gives
 Consequently the exponential hierarchy collapses to its second level.
 \end{theorem}
 
-This strengthens an earlier theorem of Selman and Sengupta that obtained only
-a third-level collapse.  The distinction is important: the later argument
-extends the Boppana--H\aa stad--Zachos proof to quasipolynomial resource bounds
-before applying padding.
+The direct statement $\mathsf{coNP}\subseteq\AM_{\qpoly}\Rightarrow
+\EH\subseteq\AM_{\EXP}$ is Theorem~7 of~\cite{PV04}.  Its proof extends the
+Boppana--H\aa stad--Zachos argument to quasipolynomial resource bounds before
+applying padding.  The later four-author treatment~\cite{PSSV07} also studies
+the equivalent polylogarithmic-round formulation.
 
 \section{A constant-sensitive coNP barrier at the unit factor}
 \label{sec:constant}
@@ -224,6 +238,16 @@ on the dual lattice with two estimates:
 \end{align}
 They also prove an exponentially small tail above $C\sqrt D$ for every fixed
 $C>1/\sqrt{2\pi}$.  These are Lemmas~2.5, 2.6, and 3.1 of~\cite{AR05}.
+
+For context, these same estimates together with the standard inequality
+$\cos z\ge1-z^2/2$ already give every factor
+$(1/\sqrt2+\varepsilon)\sqrt D$: the close-case cosine average stays positive
+for $b<1/\sqrt\pi$, while the far threshold approaches
+$a=1/\sqrt{2\pi}$.  The argument below replaces that quadratic support line
+and improves the ratio from $1/\sqrt2$ to $2/\pi$.  Aggarwal et al.'s related
+superpolynomial-time refinement applies to SVP rather than CVP
+\cite[Theorem~1.2]{ABBGKLPV22}, so it does not subsume this constant tracking
+for the target-bearing CVP verifier.
 
 \begin{lemma}[Quadratic support for cosine]                 \label{lem:cosine}
 For $0\le A\le\pi/2$ and every $y\in\mathbb R$,
@@ -354,14 +378,16 @@ $\mathsf{NP}\ne\mathsf{coNP}$.  Without a separation assumption it remains
 logically open: the containment proves the collapse consequence, not the
 unconditional nonexistence of a reduction.  Independently, the universal
 coAM protocol used below gives the EH-noncollapse and AMETH barriers without
-any leading-constant ambiguity.
+any leading-constant ambiguity.  The unit-factor consequence is standard in
+the later literature~\cite{ABBGKLPV22}; Theorem~\ref{thm:arsharp} contributes
+the explicit $2/\pi+\varepsilon$ threshold.
 
 \section{The quantitative \texorpdfstring{$\coAM$}{coAM} protocol}
 
 Aggarwal et al. prove the following tradeoff.
 
 \begin{theorem}[Aggarwal et al.]                                  \label{thm:coam}
-Corollary 3.3 of~\cite{ABBGKLPV26} states that for every
+Corollary 3.3 of~\cite{ABBGKLPV22} states that for every
 $\gamma=\gamma(D)\ge1$, rank-$D$ Euclidean
 $\GapCVP_\gamma$ has a constant-round $\coAM$ protocol of complexity
 \[
@@ -517,8 +543,8 @@ longer places the composed source problem in $\AM_{\qpoly}$.
 
 \section{The stronger AMETH boundary}
 
-Aggarwal et al. define AMETH as the assertion that, for some $\varepsilon>0$,
-$3$-$\TAUT$ has no constant-round public-coin protocol of complexity
+Aggarwal et al.~\cite{ABBGKLPV22} define AMETH as the assertion that, for
+some $\varepsilon>0$, $3$-$\TAUT$ has no constant-round public-coin protocol of complexity
 $2^{\varepsilon n}$.  The same composition gives a stronger but less
 structural conditional barrier.  Here, unlike in Sections 2--5, $n$ denotes
 the number of variables.  We restrict the proposed reduction to $3$-CNF
@@ -587,7 +613,7 @@ enumeration costs
 \[
   2^{\Omega(N_2)},
 \]
-not quasipolynomial time.  Corollary 3.3 of~\cite{ABBGKLPV26} invokes generic
+not quasipolynomial time.  Corollary 3.3 of~\cite{ABBGKLPV22} invokes generic
 Goldwasser--Sipser~\cite{GS89} and Babai--Moran~\cite{BM88}
 transformations with polynomial overhead;
 it does not replace the experiment by a pairwise-independent test with a
@@ -641,6 +667,8 @@ out an improvement into the superpolylogarithmic strip (12).
 At exponent $1/2$, the leading constant matters.  Theorem~\ref{thm:arsharp}
 gives a coNP barrier for every fixed factor
 $\lambda\sqrt D$ with $\lambda>2/\pi$, including the exact unit factor.
+The standard quadratic estimate already gives the weaker explicit threshold
+$\lambda>1/\sqrt2$ and therefore the same unit-factor consequence.
 For smaller positive constants, the polynomial-time coAM barrier still gives
 the usual polynomial-hierarchy collapse consequence, but the present
 constant-sensitive argument does not claim coNP membership.
@@ -665,9 +693,11 @@ At the exact factor $\sqrt D$, the conclusion is stronger:
   \text{NP-hardness of }\GapCVP_{\sqrt D}
   \Longrightarrow \mathsf{NP}=\mathsf{coNP}.}
 \]
-This uses the verified constant-sensitive sharpening in
-Theorem~\ref{thm:arsharp}; the published Aharonov--Regev theorem itself states
-only the existence of an absolute constant and displays the safe value $100$.
+This standard consequence is recorded explicitly in later literature.  The
+new constant-sensitive statement in Theorem~\ref{thm:arsharp} locates the
+coNP threshold at every factor above $2/\pi$; the published
+Aharonov--Regev theorem itself states only the existence of an absolute
+constant and displays the safe value $100$.
 
 The next unresolved asymptotic target, for rank-regular reductions and under
 that assumption alone, is hardness with a loss that is simultaneously

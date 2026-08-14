@@ -13,6 +13,12 @@ superpolylogarithmic loss as the first dimension-only region outside the
 quasipolynomial-coAM argument for rank-regular reductions. The genuinely
 near-square-root subregion additionally requires subpolynomial loss.
 
+Goldreich--Goldwasser already gives the stronger polynomial-time coAM/PH
+barrier through the range `C<1/2`; at `C=1/2`, the quantitative Aggarwal et
+al. protocol is itself polynomial. The added asymptotic range in this note is
+`C>1/2`, where that protocol is quasipolynomial and the
+Pavan--Vinodchandran hierarchy theorem supplies the EH consequence.
+
 The fixed-exponent hardness baseline is Mira's formalized theorem for every
 fixed `c<1/2`, cited through the manuscript PDF and its audited public
 repository commit.
@@ -39,9 +45,10 @@ The updated paper also proves a constant-sensitive sharpening of the
 Aharonov--Regev verifier:
 `GapCVP_((2/pi+epsilon)sqrt(D))` lies in `NP intersect coNP` for every fixed
 positive `epsilon`. Consequently, deterministic Karp hardness at the exact
-unit factor `sqrt(D)` would imply `NP = coNP`. This sharpening is proved in
-the paper; it is not attributed to the literal statement of the original
-Aharonov--Regev theorem, which only specifies an absolute constant.
+unit factor `sqrt(D)` would imply `NP = coNP`. That unit-factor consequence is
+standard in later literature; the new claim proved here is the explicit
+`2/pi+epsilon` constant, improving the `1/sqrt(2)+epsilon` threshold obtained
+from the usual quadratic cosine bound applied to the same verifier estimates.
 
 ## Authorship and provenance
 
