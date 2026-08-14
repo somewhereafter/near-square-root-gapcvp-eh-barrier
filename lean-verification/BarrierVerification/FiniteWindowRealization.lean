@@ -115,9 +115,8 @@ theorem range_blockSynthesis
     rw [blockSynthesis_apply (K := K)]
     rw [Fintype.sum_eq_single ib]
     · rw [Pi.single_eq_same]
-      simp [ib]
     · intro j hj
-      rw [Pi.single_eq_of_ne (Ne.symm hj), map_zero]
+      rw [Pi.single_eq_of_ne hj, map_zero]
 
 /-- Flattening the coefficient blocks turns block synthesis into ordinary
 matrix-vector multiplication by the rectangular block-Hankel matrix. -/
@@ -433,13 +432,12 @@ theorem inducedShiftOnRange_apply
     inducedShiftOnRange phi psi hker hrange
         ⟨phi x, ⟨x, rfl⟩⟩ =
       ⟨psi x, hrange ⟨x, rfl⟩⟩ := by
+  apply Subtype.ext
   change
-    (LinearMap.ker phi).liftQ
-        (psi.codRestrict (LinearMap.range phi) fun y => hrange ⟨y, rfl⟩) _
-        (phi.quotKerEquivRange.symm ⟨phi x, ⟨x, rfl⟩⟩) =
-      ⟨psi x, hrange ⟨x, rfl⟩⟩
-  rw [LinearMap.quotKerEquivRange_symm_apply_image,
-    Submodule.liftQ_apply]
+    ((inducedShiftOnRange phi psi hker hrange
+      ⟨phi x, ⟨x, rfl⟩⟩ : LinearMap.range phi) : Y) = psi x
+  simp [inducedShiftOnRange,
+    LinearMap.quotKerEquivRange_symm_apply_image]
 
 /-- At a plateau, shifting the displayed block columns introduces no new
 state direction. -/
