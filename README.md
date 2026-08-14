@@ -14,7 +14,8 @@ quasipolynomial-coAM argument for rank-regular reductions. The genuinely
 near-square-root subregion additionally requires subpolynomial loss.
 
 The fixed-exponent hardness baseline is Mira's formalized theorem for every
-fixed `c<1/2`, cited at its audited public repository commit.
+fixed `c<1/2`, cited through the manuscript PDF and its audited public
+repository commit.
 
 Build with the verified MiKTeX sequence:
 
