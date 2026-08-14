@@ -1,3 +1,4 @@
-import BarrierVerification.RectangularCommonAtom
+import BarrierVerification.FiniteWindowRealization
 
 #print axioms BarrierVerification.matrixCommonAtomOfRealization
+#print axioms BarrierVerification.reverseWindowFamily_linearIndependent
