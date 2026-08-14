@@ -4,3 +4,4 @@
 *.log
 *.out
 main.pdf
+lean-verification/.lake/

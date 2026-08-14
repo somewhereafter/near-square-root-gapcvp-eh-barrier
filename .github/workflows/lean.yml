@@ -1,0 +1,33 @@
+name: Lean verification
+
+on:
+  push:
+    paths:
+      - "lean-verification/**"
+      - ".github/workflows/lean.yml"
+  pull_request:
+    paths:
+      - "lean-verification/**"
+      - ".github/workflows/lean.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean through elan
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve pinned dependencies
+        working-directory: lean-verification
+        run: ~/.elan/bin/lake update
+      - name: Download Mathlib cache
+        working-directory: lean-verification
+        run: ~/.elan/bin/lake exe cache get
+      - name: Build verification library
+        working-directory: lean-verification
+        run: ~/.elan/bin/lake build

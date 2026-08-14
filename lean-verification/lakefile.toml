@@ -1,0 +1,12 @@
+name = "barrier-verification"
+version = "0.1.0"
+
+defaultTargets = ["BarrierVerification"]
+
+[[require]]
+name = "cvp-formalization"
+git = "https://github.com/Mira-acc/cvp.git"
+rev = "44a92a158bff7e95cbc2ac11c5717c18cb83d535"
+
+[[lean_lib]]
+name = "BarrierVerification"
