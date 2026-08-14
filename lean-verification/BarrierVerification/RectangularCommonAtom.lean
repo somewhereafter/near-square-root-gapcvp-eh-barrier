@@ -144,7 +144,6 @@ theorem matrixCommonAtomOfRealization
       (split.symm (Pi.single (indexEquiv i) 1))
     have : (1 : K) = 0 := by
       simp [coordinate, hindex_ne] at htest
-      exact htest
     exact one_ne_zero this
   let primitiveIdempotent (i : I) : A :=
     split.symm (Pi.single i 1)
