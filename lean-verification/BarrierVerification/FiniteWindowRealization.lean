@@ -363,4 +363,38 @@ theorem ker_blockSynthesis_le_ker_shifted
   rw [shiftedBlockSynthesis_apply (K := K)]
   exact shifted_blockColumn_relation moment k h t L htk hguard hrank x hx
 
+/-- The canonical endomorphism on a realized range when a second map has no
+new relations and no new output directions. -/
+noncomputable def inducedShiftOnRange
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (phi psi : X →ₗ[K] Y)
+    (hker : LinearMap.ker phi ≤ LinearMap.ker psi)
+    (hrange : LinearMap.range psi ≤ LinearMap.range phi) :
+    LinearMap.range phi →ₗ[K] LinearMap.range phi := by
+  let psiRange : X →ₗ[K] LinearMap.range phi :=
+    psi.codRestrict (LinearMap.range phi) fun x => hrange ⟨x, rfl⟩
+  have hkerRange : LinearMap.ker phi ≤ LinearMap.ker psiRange := by
+    intro x hx
+    rw [LinearMap.mem_ker] at hx ⊢
+    apply Subtype.ext
+    change psi x = 0
+    exact LinearMap.mem_ker.1 (hker (LinearMap.mem_ker.2 hx))
+  exact (LinearMap.ker phi).liftQ psiRange hkerRange |>.comp
+    phi.quotKerEquivRange.symm.toLinearMap
+
+/-- `inducedShiftOnRange` sends the state represented by `x` to the state
+represented by `psi x`. -/
+theorem inducedShiftOnRange_apply
+    {K X Y : Type*} [Field K] [AddCommGroup X] [Module K X]
+    [AddCommGroup Y] [Module K Y]
+    (phi psi : X →ₗ[K] Y)
+    (hker : LinearMap.ker phi ≤ LinearMap.ker psi)
+    (hrange : LinearMap.range psi ≤ LinearMap.range phi)
+    (x : X) :
+    inducedShiftOnRange phi psi hker hrange
+        ⟨phi x, ⟨x, rfl⟩⟩ =
+      ⟨psi x, hrange ⟨x, rfl⟩⟩ := by
+  simp [inducedShiftOnRange, LinearMap.quotKerEquivRange_symm_apply_image]
+
 end BarrierVerification
