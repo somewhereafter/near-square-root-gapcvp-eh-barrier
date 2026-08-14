@@ -127,7 +127,7 @@ theorem generatedFunctional_mapSq
   have hit : (i : ℕ) < t := by
     have hi : (i : ℕ) < Module.finrank K A0 := by
       simpa [hpbdim] using i.isLt
-    omega
+    exact hi.trans_le (by simpa [A0] using hfinrank)
   have hiC : 2 * (i : ℕ) ≤ C := by omega
   have himoment := hmoment (2 * (i : ℕ)) hiC
   have himoment' := hmoment (i : ℕ) (by omega)
